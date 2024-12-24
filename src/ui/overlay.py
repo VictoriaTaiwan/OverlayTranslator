@@ -3,9 +3,11 @@ from PyQt5.QtCore import Qt, QRect, QPoint, QTimer
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from pynput.keyboard import Key, Listener
-from pynput import mouse
+#from pynput import mouse
 from translated_widget import TranslatedWidget
 from PyQt5.QtWidgets import *
+from PIL import ImageGrab
+from ocr.tesseract import Ocr
 
 class Overlay(QMainWindow):
     def __init__(self):
@@ -73,9 +75,17 @@ class Overlay(QMainWindow):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             print('Released')
-            window.isMouseClicked = False 
-            self.add_widget_at_position("NEW WIDGET")
+            window.isMouseClicked = False
+            #self.add_widget_at_position("NEW WIDGET")
             self.update()
+            
+            #width = abs(self.begin.x() - self.end.x())
+            #height = abs(self.begin.y() - self.end.y())
+            bbox = (self.begin.x(), self.begin.y(), self.end.x(), self.end.y()) 
+            print(bbox)
+            captured_image = ImageGrab.grab(bbox=bbox) 
+            ocr = Ocr()
+            ocr.imageToTextFile(captured_image)
     
     def mouseMoveEvent(self, event):
         if(window.isMouseClicked):

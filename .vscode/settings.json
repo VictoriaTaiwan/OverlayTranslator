@@ -1,6 +1,9 @@
 {
     "cSpell.words": [
         "Frameless",
-        "pynput"
+        "pynput",
+        "tessdata",
+        "Tesseract",
+        "tesserocr"
     ]
 }
