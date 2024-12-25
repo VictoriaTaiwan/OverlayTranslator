@@ -3,11 +3,12 @@ from PyQt5.QtCore import Qt, QRect, QPoint, QTimer
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from pynput.keyboard import Key, Listener
-#from pynput import mouse
 from translated_widget import TranslatedWidget
 from PyQt5.QtWidgets import *
 from PIL import ImageGrab
-from ocr.tesseract import Ocr
+from data.ocr.tesseract import Ocr
+from data.translation.translator import Translator
+from data.translation.translator_service import SERVICE
 
 class Overlay(QMainWindow):
     def __init__(self):
@@ -83,9 +84,16 @@ class Overlay(QMainWindow):
             #height = abs(self.begin.y() - self.end.y())
             bbox = (self.begin.x(), self.begin.y(), self.end.x(), self.end.y()) 
             print(bbox)
+            
             captured_image = ImageGrab.grab(bbox=bbox) 
             ocr = Ocr()
-            ocr.imageToTextFile(captured_image)
+            ocr.imageToText(captured_image)
+            print(ocr)
+            
+            translator = Translator()
+            translation = translator.translate(SERVICE.DEEPL, ocr)
+            print(translation)
+            
     
     def mouseMoveEvent(self, event):
         if(window.isMouseClicked):

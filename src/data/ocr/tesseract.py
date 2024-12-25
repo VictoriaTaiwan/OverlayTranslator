@@ -7,11 +7,9 @@ tessdata_path = r"C:\Program Files\Tesseract-OCR\tessdata"  # Path to tessdata f
 # Create a PIL Image object to pass to SetImage
 #image = Image.open(image_path)
 class Ocr():   
-    def imageToTextFile(self, image):
+    def imageToText(self, image):
         with PyTessBaseAPI(path=tessdata_path, lang='rus+eng+jpn') as api:
             api.SetImage(image)
-            ocr = api.GetUTF8Text()
-            confidence = api.AllWordConfidences()
-    
-            print(ocr)
-            print(confidence) 
+            return api.GetUTF8Text()
+            #confidence = api.AllWordConfidences()
+            #print(confidence) 
