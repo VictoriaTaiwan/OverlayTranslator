@@ -11,9 +11,10 @@ class Overlay(QMainWindow):
         self.setMouseTracking(True)
         self.onMouseReleased = onMouseReleased
 
-        # Window flags for frameless, transparent, and always-on-top window
-        self.setWindowFlags(Qt.WindowStaysOnTopHint| Qt.FramelessWindowHint)
+        # Window flags for frameless, transparent, hidden from taskbar and always-on-top window
+        self.setWindowFlags(Qt.Tool| Qt.WindowStaysOnTopHint| Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
+        self.showFullScreen()
         
         # Start the keyboard listener
         listener = Listener(on_press=self.on_press)
@@ -25,7 +26,7 @@ class Overlay(QMainWindow):
         self.begin = QPoint()
         self.end = QPoint()
 
-    def showOverlay(self):
+    def toggleOverlay(self):
         self.can_draw = not self.can_draw
         print(f"Overlay {'shown' if self.can_draw else 'hidden'}") 
     
@@ -77,5 +78,5 @@ class Overlay(QMainWindow):
 
     def on_press(self, key):
         if key == Key.up:  # Toggle overlay on "Up" key press
-            self.showOverlay()
+            self.toggleOverlay()
             self.update()
