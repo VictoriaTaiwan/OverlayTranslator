@@ -5,7 +5,7 @@ from .key_listener_field import KeyListenerField
 class OptionsDialog(QWidget):
     def __init__(self, screenCenter): 
         super().__init__()
-        self.setWindowFlags(Qt.Tool)
+        self.setWindowFlags(Qt.Tool| Qt.WindowStaysOnTopHint)
         self.setWindowTitle("Settings")
         
         self.setMinimumSize(300,300)
@@ -16,11 +16,16 @@ class OptionsDialog(QWidget):
         
         overlayLabel = QLabel(self)
         overlayLabel.setText("Overlay")
-        self.overlayLabel = overlayLabel
         
         overlayField = KeyListenerField("overlay", self.saveHotkey, self)
         overlayField.setGeometry(QRect(20, 20, 141, 20))
-        self.overlayField = overlayField
+        
+    
+    def mousePressEvent(self, event):
+        # Clear focus if clicking anywhere outside focused widgets
+        if self.focusWidget() is not None:
+            self.focusWidget().clearFocus()    
+        super().mousePressEvent(event)    
     
     def saveHotkey(self, name, key):
         print(f'Functionality {name} was bind to {key} button')    
