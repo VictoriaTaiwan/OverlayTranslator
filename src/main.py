@@ -31,7 +31,7 @@ if __name__ == "__main__":
     app.setQuitOnLastWindowClosed(False)
     
     screenCenter = app.desktop().screenGeometry().center()        
-    translatedWidget = OptionsDialog("Options", screenCenter)
+    translatedWidget = OptionsDialog(screenCenter)
     
     window = Overlay(onMouseReleased=main.onScreenshotTranslate)
     window.show()
