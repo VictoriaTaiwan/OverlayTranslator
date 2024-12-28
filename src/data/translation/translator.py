@@ -1,29 +1,29 @@
 
 import requests
 from auth.keys import deepl_api_key
-from .service import SERVICE
+from src.data.translation.service import SERVICE
+from src.data.translation.language import LANGUAGE
 import urllib.parse as encoder
 class Translator:
     deeplApiBaseUrl = "https://api-free.deepl.com/v2/translate"
     googleBaseUrl = "https://translate.googleapis.com/translate_a/single?client=gtx"
     
-    def translate(self, service, text):
-        # Map service to the corresponding translation method
-        switcher = {
+    def translate(self, service, text, targetLanguage=LANGUAGE.ENGLISH):
+        translationServices = {
             SERVICE.GOOGLE: self.googleTranslate,
             SERVICE.DEEPL: self.deeplTranslate
         }
-        
-        if translation_method := switcher.get(service):
-            return translation_method(text)
+            
+        if translationFunc := translationServices.get(service):
+            return translationFunc(text, targetLanguage)
         else:
-            return (f"Unsupported translation service: {service}")
+            return(f"Unsupported translation service: {service}")
     
-    def deeplTranslate(self, text):
+    def deeplTranslate(self, text, targetLanguage):
         params = {
             "auth_key": deepl_api_key,
             "text": [text],
-            "target_lang": "EN"
+            "target_lang": targetLanguage.deeplTL
         }
         response = requests.post(url=self.deeplApiBaseUrl, params=params)
         if(response.status_code == 200):
@@ -31,9 +31,9 @@ class Translator:
         else: return "No data."
         
     
-    def googleTranslate(self, text):
-        url = f"{self.googleBaseUrl}&sl=auto&tl=en&dt=t&q={encoder.quote(text)}"
-        response =  requests.post(url=url)
+    def googleTranslate(self, text, targetLanguage):
+        url = f"{self.googleBaseUrl}&sl=auto&tl={targetLanguage.googleTL}&dt=t&q={encoder.quote(text)}"
+        response =  requests.get(url=url)
         if(response.status_code == 200):
             return self.extract_google_translation(response.json())
         else: return "No data."

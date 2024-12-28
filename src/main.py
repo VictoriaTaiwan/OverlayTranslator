@@ -30,14 +30,7 @@ class Main:
         self.hotkeys = {}
         # Start the keyboard listener
         self.initGlobalHotKeys()    
-        self.initUI()    
-    
-    def onSaveKeys(self, keys):
-        self.optionsWidget.hide()
-        for key, value in keys.items():
-            self.config.saveHotKey(key, value)
-        self.globalHotkeys.stop()
-        self.initGlobalHotKeys()
+        self.initUI()       
     
     def initGlobalHotKeys(self):
         self.hotkeys = {
@@ -65,13 +58,9 @@ class Main:
         overlay.show()   
         self.overlay = overlay           
         
-        icon = QIcon(APP_TRAY_ICON_PATH)   
-        # Adding item on the menu bar 
-        tray = QSystemTrayIcon() 
-        tray.setIcon(icon) 
-        tray.setVisible(True)          
-    
+        tray = QSystemTrayIcon(QIcon(APP_TRAY_ICON_PATH), app)         
         menu = QMenu() 
+        
         settings = QAction("Settings") 
         settings.triggered.connect(self.optionsWidget.show)
         menu.addAction(settings)   
@@ -83,17 +72,25 @@ class Main:
     
         # Adding options to the System Tray 
         tray.setContextMenu(menu) 
+        tray.setVisible(True)
         sys.exit(app.exec())
             
+    def onSaveKeys(self, keys):
+        self.optionsWidget.hide()
+        for key, value in keys.items():
+            self.config.saveHotKey(key, value)
+        self.globalHotkeys.stop()
+        self.initGlobalHotKeys()
+    
     def onScreenshotTranslate(self, bbox):
         captured_image = ImageGrab.grab(bbox=bbox) 
         ocrResult = self.ocr.imageToText(captured_image)
         print(ocrResult)    
-        translation = self.translator.translate(SERVICE.DEEPL, ocrResult)
+        translation = self.translator.translate(service=SERVICE.DEEPL, text=ocrResult)
         print(translation)  
 
-    def centralizeWidget(self, app, widget):
-        screenCenter = app.desktop().screenGeometry().center()   
+    def centralizeWidget(self, parent, widget):
+        screenCenter = parent.desktop().screenGeometry().center()   
         x = int(widget.minimumWidth() / 2)
         y = int(widget.minimumHeight() / 2)
         widgetPoint = QPoint(screenCenter.x()-x, screenCenter.y()-y)    
