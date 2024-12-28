@@ -1,7 +1,7 @@
 
 import requests
 from auth.keys import deepl_api_key
-from .translator_service import SERVICE
+from .service import SERVICE
 import urllib.parse as encoder
 class Translator:
     deeplApiBaseUrl = "https://api-free.deepl.com/v2/translate"
