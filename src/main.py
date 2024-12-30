@@ -90,6 +90,7 @@ class Main:
         sys.exit(self.app.exec())
     
     def quit(self):
+        print("Quit app")
         self.globalHotkeys.stop()  # Stop global hotkeys
         self.app.quit()    
             
@@ -105,6 +106,7 @@ class Main:
         self.tabbedWidget.update()
     
     def onSaveData(self, keys):
+        print("Save data")
         self.optionsWidget.hide()
         for key, value in keys.items():
             self.config.saveHotKey(key, value)
