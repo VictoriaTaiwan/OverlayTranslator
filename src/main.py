@@ -5,78 +5,83 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from data.ocr.tesseract import Ocr
 from data.translation.translator import Translator
-from data.config import Config
-from enums.Hotkey import HOTKEY
+from src.data.translation.service import SERVICE
+from data.translation.language import LANGUAGE
+from data.config.config_helper import ConfigHelper
+from data.config.data_keys import DATA_KEY
 
 from pynput.keyboard import GlobalHotKeys
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMenu, QAction, QSystemTrayIcon, QTabWidget
 
-from src.ui.translation_thread import TranslationThread
+from ui.translation_thread import TranslationThread
 from ui.overlay import Overlay
-from src.ui.options_widget import OptionsWidget
-from src.ui.translator_widget import TranslatorWidget
+from ui.options_widget import OptionsWidget
+from ui.translator_widget import TranslatorWidget
 
-DEFAULT_HOTKEY_SELECT_AREA = "<alt>+x"
-DEFAULT_HOTKEY_TOGGLE_OVERLAY = "<alt>+n"
-APP_TRAY_ICON_PATH = "src/res/penguin.png"
-
-class Main:
+class Main:    
     def __init__(self):
-        self.translator = Translator()
+        self.config_helper = ConfigHelper()
+        self.init_app_data()  
+        
+        self.translator = Translator(self.translation_service, self.target_language)
         self.ocr = Ocr()
-        self.config = Config()
-        self.hotkeys = {}
-        # Start the keyboard listener
-        self.initGlobalHotKeys()  
         
-        self.isDrawingMode = False
-        self.isAppVisible = True  
-        self.initUI() 
+        self.is_drawing_mode = False
+        self.is_app_visible = True  
+        self.initUI()
+        
+    DEFAULT_DATA = {
+        DATA_KEY.SELECT_AREA: "<alt>+x",
+        DATA_KEY.TOGGLE_OVERLAY: "<alt>+n",
+        DATA_KEY.TARGET_LANGUAGE: LANGUAGE.ENGLISH.value,
+        DATA_KEY.TRANSLATOR_SERVICE: SERVICE.DEEPL.value
+    }     
     
-    def initGlobalHotKeys(self):
-        self.hotkeys = {
-            HOTKEY.SELECT_AREA.value: self.config.getHotKey(
-                HOTKEY.SELECT_AREA.value, DEFAULT_HOTKEY_SELECT_AREA
-                ),
-            HOTKEY.TOGGLE_OVERLAY.value: self.config.getHotKey(
-                HOTKEY.TOGGLE_OVERLAY.value, DEFAULT_HOTKEY_TOGGLE_OVERLAY
-                ),
-        }        
+    def init_app_data(self):
+        self.data = {key: self.config_helper.get_data(key, default)
+                    for key, default in self.DEFAULT_DATA.items()}
         
-        self.globalHotkeys = GlobalHotKeys({
-            self.hotkeys[HOTKEY.SELECT_AREA.value]: lambda: self.setDrawingMode(not self.isDrawingMode),
-            self.hotkeys[HOTKEY.TOGGLE_OVERLAY.value]: lambda: self.setAppVisible(not self.isAppVisible)
+        self.target_language = LANGUAGE(int(self.data[DATA_KEY.TARGET_LANGUAGE]))
+        self.translation_service = SERVICE(int(self.data[DATA_KEY.TRANSLATOR_SERVICE]))
+        
+        self.global_hotkeys = GlobalHotKeys({
+            self.data[DATA_KEY.SELECT_AREA]: lambda: self.set_drawing_mode(not self.is_drawing_mode),
+            self.data[DATA_KEY.TOGGLE_OVERLAY]: lambda: self.set_app_visible(not self.is_app_visible)
         })
-        self.globalHotkeys.start()       
+        self.global_hotkeys.start()       
     
     def initUI(self):
-        self.app = QApplication(sys.argv)
+        self.app = QApplication(sys.argv)        
+        self.overlay = Overlay(self.start_translation)
+        self.overlay.show()        
+        self.create_tabbed_widget()                                 
+        self.create_tray()
+        sys.exit(self.app.exec())
+    
+    def create_tabbed_widget(self):    
+        self.tabbed_widget = QTabWidget()
+        self.tabbed_widget.setWindowFlags(Qt.Tool | Qt.WindowStaysOnTopHint)
+        self.tabbed_widget.setWindowTitle("Overlay Translator")
+        self.tabbed_widget.setMinimumSize(400, 400) 
         
-        self.overlay = Overlay(self.startTranslationThread)
-        self.overlay.show()  
+        self.optionsWidget = OptionsWidget(self.data, self.on_save_data)
+        self.translator_widget = TranslatorWidget()
         
-        self.tabbedWidget = QTabWidget()
-        self.tabbedWidget.setWindowFlags(Qt.Tool | Qt.WindowStaysOnTopHint)
-        self.tabbedWidget.setWindowTitle("Overlay Translator")
-        self.tabbedWidget.setMinimumSize(400, 400) 
-        
-        self.optionsWidget = OptionsWidget(self.hotkeys, self.onSaveData)
-        self.translatorWidget = TranslatorWidget()
-        
-        self.tabbedWidget.addTab(self.translatorWidget, "Translator")
-        self.tabbedWidget.addTab(self.optionsWidget, "Options")
+        self.tabbed_widget.addTab(self.translator_widget, "Translator")
+        self.tabbed_widget.addTab(self.optionsWidget, "Options")
         
         topLeftPoint = self.app.desktop().availableGeometry().topLeft()
-        self.tabbedWidget.move(topLeftPoint)
-        self.tabbedWidget.show()                    
-        
-        tray = QSystemTrayIcon(QIcon(APP_TRAY_ICON_PATH), self.app)         
+        self.tabbed_widget.move(topLeftPoint)
+        self.tabbed_widget.show()
+    
+    def create_tray(self):         
+        tray = QSystemTrayIcon(QIcon("src/res/penguin.png"), self.app)         
         menu = QMenu() 
         
         settings = QAction("App") 
-        settings.triggered.connect(self.tabbedWidget.show)
+        settings.triggered.connect(self.tabbed_widget.show)
         menu.addAction(settings)   
     
         # To quit the app 
@@ -87,60 +92,60 @@ class Main:
         # Adding options to the System Tray 
         tray.setContextMenu(menu) 
         tray.setVisible(True)
-        sys.exit(self.app.exec())
-    
+        
     def quit(self):
         print("Quit app")
-        self.globalHotkeys.stop()  # Stop global hotkeys
+        self.global_hotkeys.stop()  # Stop global hotkeys
         self.app.quit()    
             
-    def setDrawingMode(self, isDrawingMode: bool):
-        self.isDrawingMode = isDrawingMode
-        self.tabbedWidget.setVisible(not isDrawingMode)
-        self.tabbedWidget.update()
-        self.overlay.setDrawingMode(isDrawingMode)
+    def set_drawing_mode(self, is_drawing_mode: bool):
+        self.is_drawing_mode = is_drawing_mode
+        self.tabbed_widget.setVisible(not is_drawing_mode)
+        self.tabbed_widget.update()
+        self.overlay.set_drawing_mode(is_drawing_mode)
     
-    def setAppVisible(self, isAppVisible: bool):
-        self.isAppVisible = isAppVisible
-        self.tabbedWidget.setVisible(isAppVisible)  
-        self.tabbedWidget.update()
+    def set_app_visible(self, is_app_visible: bool):
+        self.is_app_visible = is_app_visible
+        self.tabbed_widget.setVisible(is_app_visible)  
+        self.tabbed_widget.update()
     
-    def onSaveData(self, keys):
+    def on_save_data(self, keys):
         print("Save data")
-        self.optionsWidget.hide()
         for key, value in keys.items():
-            self.config.saveHotKey(key, value)
-        self.globalHotkeys.stop()
-        self.initGlobalHotKeys()
+            self.config_helper.save_data(key, value)
+        self.global_hotkeys.stop()
+        self.init_app_data()
+        self.translator.target_language = self.target_language     
+        self.translator.service = self.translation_service   
     
-    def startTranslationThread(self, bbox):       
+    def start_translation(self, bbox):       
         self.thread = TranslationThread(self.ocr, self.translator, bbox)
         
-        self.setAppVisible(True)
-        self.setDrawingMode(False)
+        self.set_app_visible(True)
+        self.set_drawing_mode(False)
         
-        self.translatorWidget.setOcrText('')
-        self.translatorWidget.setTranslatedText('')
-        self.translatorWidget.updateStatus('Recognizing text...')
+        self.translator_widget.set_ocr_text('')
+        self.translator_widget.set_translated_text('')
+        self.translator_widget.update_status('Recognizing text...')
         
-        self.thread.ocrResult.connect(
-            lambda ocrResult: self.updateOcrStatus(ocrResult)
+        self.thread.ocr_result.connect(
+            lambda ocrResult: self.update_ocr_status(ocrResult)
         )
-        self.thread.translationResult.connect(
-            lambda translation: self.updateTranslationStatus(translation)
+        self.thread.translation_result.connect(
+            lambda translation: self.update_translation_status(translation)
         )
         
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.finished.connect(lambda: print("Background thread finished its work."))
         self.thread.start()
     
-    def updateOcrStatus(self, ocrResult):                                     
-        self.translatorWidget.updateStatus('Translating text...')
-        self.translatorWidget.setOcrText(ocrResult)
+    def update_ocr_status(self, ocrResult):                                     
+        self.translator_widget.update_status('Translating text...')
+        self.translator_widget.set_ocr_text(ocrResult)
     
-    def updateTranslationStatus(self, translation):
-        self.translatorWidget.updateStatus('')
-        self.translatorWidget.setTranslatedText(translation)
+    def update_translation_status(self, translation):
+        self.translator_widget.update_status('')
+        self.translator_widget.set_translated_text(translation)
         
 if __name__ == "__main__":
     main = Main()

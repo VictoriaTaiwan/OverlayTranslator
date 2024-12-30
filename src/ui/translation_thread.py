@@ -4,12 +4,11 @@ from PyQt5.QtCore import QThread, pyqtSignal
 
 from data.ocr.tesseract import Ocr
 from data.translation.translator import Translator
-from src.data.translation.service import SERVICE
 
 class TranslationThread(QThread):
     finished = pyqtSignal()
-    ocrResult = pyqtSignal(str)
-    translationResult = pyqtSignal(str)
+    ocr_result = pyqtSignal(str)
+    translation_result = pyqtSignal(str)
     
     def __init__(self, ocr:Ocr, translator:Translator, bbox):
         super(TranslationThread, self).__init__()
@@ -20,13 +19,13 @@ class TranslationThread(QThread):
     def run(self):
         try:
             capturedImage = ImageGrab.grab(bbox=self.bbox) 
-            ocrResult = self.ocr.imageToText(capturedImage)
+            ocrResult = self.ocr.image_to_text(capturedImage)
             print("Received Ocr result")
-            self.ocrResult.emit(ocrResult)
+            self.ocr_result.emit(ocrResult)
                 
-            translation = self.translator.translate(service=SERVICE.DEEPL, text=ocrResult)
+            translation = self.translator.translate(text=ocrResult)
             print("Received Translation result")
-            self.translationResult.emit(translation)   
+            self.translation_result.emit(translation)   
         except Exception as e:
             print(f"Worker error: {e}")
         finally:

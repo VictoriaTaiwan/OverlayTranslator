@@ -3,31 +3,31 @@ from PyQt5 import QtGui
 from PyQt5.QtWidgets import QMainWindow
 
 class Overlay(QMainWindow):
-    def __init__(self, onMouseReleased):
+    def __init__(self, on_mouse_released):
         super().__init__()
 
         self.setWindowTitle("Overlay Translator")
         self.setMouseTracking(True)
-        self.onMouseReleased = onMouseReleased
+        self.on_mouse_released = on_mouse_released
 
         # Window flags for frameless, transparent, hidden from taskbar and always-on-top window
         self.setWindowFlags(Qt.Tool| Qt.WindowStaysOnTopHint| Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.showFullScreen()
         
-        self.isDrawingMode = False
-        self.isMouseClicked = False
+        self.is_drawing_mode = False
+        self.is_mouse_clicked = False
         
         self.begin = QPoint()
         self.end = QPoint()
 
-    def setDrawingMode(self, isDrawingMode: bool):
-        self.isDrawingMode = isDrawingMode
+    def set_drawing_mode(self, is_drawing_mode: bool):
+        self.is_drawing_mode = is_drawing_mode
         self.update()
-        print(f"Overlay {'shown' if self.isDrawingMode else 'hidden'}") 
+        print(f"Overlay {'shown' if self.is_drawing_mode else 'hidden'}") 
     
     def paintEvent(self, event):
-        if not self.isDrawingMode:
+        if not self.is_drawing_mode:
             return   
         qp = QtGui.QPainter(self)
         
@@ -46,7 +46,7 @@ class Overlay(QMainWindow):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.isMouseClicked = True 
+            self.is_mouse_clicked = True 
             click_position = event.pos()
             print(f"Mouse clicked at: {click_position}")
             self.begin = event.pos()
@@ -56,18 +56,18 @@ class Overlay(QMainWindow):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             print('Mouse released')
-            self.isMouseClicked = False
+            self.is_mouse_clicked = False
             
             if(self.begin.x()!=self.begin.y()):
                 bbox = (self.begin.x(), self.begin.y(), self.end.x(), self.end.y()) 
                 print(f"onMouseReleased called from Overlay class with bbox: {bbox}")
-                self.onMouseReleased(bbox)
+                self.on_mouse_released(bbox)
                 
             self.end = self.begin = event.pos()
             self.update()                 
     
     def mouseMoveEvent(self, event):
-        if(self.isMouseClicked):
+        if(self.is_mouse_clicked):
             print('Mouse dragged')
             self.end = event.pos()
             self.update()

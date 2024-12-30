@@ -6,10 +6,10 @@ from PIL import Image
 tessdata_path = r"C:\Program Files\Tesseract-OCR\tessdata"  # Path to tessdata folder
 
 class Ocr():   
-    def imageToText(self, image):
+    def image_to_text(self, image):
         tesseract = PyTessBaseAPI(path=tessdata_path, lang='rus+eng+jpn')
         try:
-            img = self.improveImageQuality(image)
+            img = self.improve_image_quality(image)
             tesseract.SetImage(img)
             return tesseract.GetUTF8Text()
         finally:
@@ -17,7 +17,7 @@ class Ocr():
         #confidence = api.AllWordConfidences()
         #print(confidence)
     
-    def improveImageQuality(self, image) -> Image:
+    def improve_image_quality(self, image) -> Image:
         # Load the image
         img = cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR)
 

@@ -1,13 +1,13 @@
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtCore import Qt
 class HotkeyField(QLineEdit):
-    def __init__(self, onValueChanged, initialValue ='', parent=None):
+    def __init__(self, on_value_changed, initial_value ='', parent=None):
         super().__init__(parent)
         self.setReadOnly(True)
         self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
-        self.setText(initialValue)
+        self.setText(initial_value)
         
-        self.onValueChanged=onValueChanged
+        self.on_value_changed=on_value_changed
         self.setStyleSheet("""
             QLineEdit:focus {
                 background-color: #F9E87C;
@@ -26,17 +26,17 @@ class HotkeyField(QLineEdit):
             if event.modifiers() & Qt.ShiftModifier:
                 modifiers.append("<shift>")
 
-            if key_text:= self.getKeyName(event):
+            if key_text:= self.get_key_name(event):
                 if key_text not in modifiers:   
                     key_sequence = "+".join(modifiers + [key_text])
                 else: 
                     key_sequence = "+".join(modifiers)
                 
-                self.onValueChanged(key_sequence)
+                self.on_value_changed(key_sequence)
                 self.setText(key_sequence)
         super().keyPressEvent(event)
     
-    def getKeyName(self, event):        
+    def get_key_name(self, event):        
         key_code = event.key()
         # Map special key codes to readable names
         key_map = {

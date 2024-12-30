@@ -5,19 +5,22 @@ class TranslatorWidget(QWidget):
     def __init__(self):
         super().__init__()
         
-        ocrLayout = QVBoxLayout()
-        ocrLabel = QLabel("Original")
-        self.ocrField = QTextEdit()
-        self.ocrField.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
-        ocrLayout.addWidget(ocrLabel, alignment=Qt.AlignCenter)
-        ocrLayout.addWidget(self.ocrField)
+        ocr_label = QLabel("Original text")
+        self.ocr_field = QTextEdit()
+        self.ocr_field.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
         
-        translationLayout = QVBoxLayout()
-        translationLabel = QLabel("Translation")
+        ocr_layout = QVBoxLayout()
+        ocr_layout.addWidget(ocr_label, alignment=Qt.AlignCenter)
+        ocr_layout.addWidget(self.ocr_field)
+        
+        translation_label = QLabel("Translation")
         self.translationField = QTextEdit()
+        self.translationField.setReadOnly(True)
         self.translationField.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
-        translationLayout.addWidget(translationLabel, alignment=Qt.AlignCenter)
-        translationLayout.addWidget(self.translationField)
+        
+        translation_layout = QVBoxLayout()
+        translation_layout.addWidget(translation_label, alignment=Qt.AlignCenter)
+        translation_layout.addWidget(self.translationField)
         
         #hideOcrButton = QPushButton("Hide recognized text")
         #hideOcrButton.clicked.connect(lambda: ocrLayout.)
@@ -25,23 +28,23 @@ class TranslatorWidget(QWidget):
         #translateButton = QPushButton("Translate")
         #translateButton.clicked.connect(lambda: onTranslate(text))
         
-        textFieldsLayout = QHBoxLayout()
-        textFieldsLayout.addLayout(ocrLayout)
-        textFieldsLayout.addLayout(translationLayout)
+        text_fields_layout = QHBoxLayout()
+        text_fields_layout.addLayout(ocr_layout)
+        text_fields_layout.addLayout(translation_layout)
         
         self.layout = QVBoxLayout(self)
-        self.statusLabel = QLabel('')
-        self.layout.addWidget(self.statusLabel, alignment=Qt.AlignCenter)
-        self.layout.addLayout(textFieldsLayout)
+        self.status_label = QLabel('')
+        self.layout.addWidget(self.status_label, alignment=Qt.AlignCenter)
+        self.layout.addLayout(text_fields_layout)
         #self.layout.addWidget(translateButton)
     
-    def updateStatus(self, text):
-        self.statusLabel.setText(text)
+    def update_status(self, text):
+        self.status_label.setText(text)
     
-    def setOcrText(self, text):
-        self.ocrField.setText(text)
+    def set_ocr_text(self, text):
+        self.ocr_field.setText(text)
     
-    def setTranslatedText(self, text):
+    def set_translated_text(self, text):
         self.translationField.setText(text)
     
     def mousePressEvent(self, event):
