@@ -1,21 +1,19 @@
 import sys 
-import asyncio
 import os
-
 sys.dont_write_bytecode = True
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from data.ocr.tesseract import Ocr
 from data.translation.translator import Translator
-from src.data.translation.service import SERVICE
 from data.config import Config
 from enums.Hotkey import HOTKEY
 
-from PIL import ImageGrab
 from pynput.keyboard import GlobalHotKeys
-from PyQt5.QtCore import Qt, QTimer, QMetaObject
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMenu, QAction, QSystemTrayIcon, QTabWidget
+
+from src.ui.translation_thread import TranslationThread
 from ui.overlay import Overlay
 from src.ui.options_widget import OptionsWidget
 from src.ui.translator_widget import TranslatorWidget
@@ -35,7 +33,7 @@ class Main:
         
         self.isDrawingMode = False
         self.isAppVisible = True  
-        self.initUI()       
+        self.initUI() 
     
     def initGlobalHotKeys(self):
         self.hotkeys = {
@@ -53,9 +51,11 @@ class Main:
         })
         self.globalHotkeys.start()       
     
-    def initUI(self):        
-        app = QApplication(sys.argv)
-        app.setQuitOnLastWindowClosed(False) 
+    def initUI(self):
+        self.app = QApplication(sys.argv)
+        
+        self.overlay = Overlay(self.startTranslationThread)
+        self.overlay.show()  
         
         self.tabbedWidget = QTabWidget()
         self.tabbedWidget.setWindowFlags(Qt.Tool | Qt.WindowStaysOnTopHint)
@@ -68,15 +68,11 @@ class Main:
         self.tabbedWidget.addTab(self.translatorWidget, "Translator")
         self.tabbedWidget.addTab(self.optionsWidget, "Options")
         
-        topLeftPoint = app.desktop().availableGeometry().topLeft()
+        topLeftPoint = self.app.desktop().availableGeometry().topLeft()
         self.tabbedWidget.move(topLeftPoint)
-        self.tabbedWidget.show()          
+        self.tabbedWidget.show()                    
         
-        overlay = Overlay(self.onMouseReleased)
-        overlay.show()   
-        self.overlay = overlay           
-        
-        tray = QSystemTrayIcon(QIcon(APP_TRAY_ICON_PATH), app)         
+        tray = QSystemTrayIcon(QIcon(APP_TRAY_ICON_PATH), self.app)         
         menu = QMenu() 
         
         settings = QAction("App") 
@@ -85,13 +81,17 @@ class Main:
     
         # To quit the app 
         quit = QAction("Quit") 
-        quit.triggered.connect(app.quit) 
+        quit.triggered.connect(self.quit) 
         menu.addAction(quit)   
     
         # Adding options to the System Tray 
         tray.setContextMenu(menu) 
         tray.setVisible(True)
-        sys.exit(app.exec())
+        sys.exit(self.app.exec())
+    
+    def quit(self):
+        self.globalHotkeys.stop()  # Stop global hotkeys
+        self.app.quit()    
             
     def setDrawingMode(self, isDrawingMode: bool):
         self.isDrawingMode = isDrawingMode
@@ -111,21 +111,34 @@ class Main:
         self.globalHotkeys.stop()
         self.initGlobalHotKeys()
     
-    async def onMouseReleased(self, bbox): # UI updates and api calls should be separated
+    def startTranslationThread(self, bbox):       
+        self.thread = TranslationThread(self.ocr, self.translator, bbox)
+        
         self.setAppVisible(True)
         self.setDrawingMode(False)
         
         self.translatorWidget.setOcrText('')
-        self.translatorWidget.setTranslatedText('')                   
+        self.translatorWidget.setTranslatedText('')
+        self.translatorWidget.updateStatus('Recognizing text...')
         
-        captured_image = ImageGrab.grab(bbox=bbox) 
-        ocrResult = self.ocr.imageToText(captured_image)
-        print(ocrResult)  
+        self.thread.ocrResult.connect(
+            lambda ocrResult: self.updateOcrStatus(ocrResult)
+        )
+        self.thread.translationResult.connect(
+            lambda translation: self.updateTranslationStatus(translation)
+        )
         
-        translation = self.translator.translate(service=SERVICE.DEEPL, text=ocrResult)
-        print(translation)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.finished.connect(lambda: print("Background thread finished its work."))
+        self.thread.start()
+    
+    def updateOcrStatus(self, ocrResult):                                     
+        self.translatorWidget.updateStatus('Translating text...')
         self.translatorWidget.setOcrText(ocrResult)
+    
+    def updateTranslationStatus(self, translation):
+        self.translatorWidget.updateStatus('')
         self.translatorWidget.setTranslatedText(translation)
         
 if __name__ == "__main__":
-    main = Main()  
+    main = Main()

@@ -57,12 +57,14 @@ class Overlay(QMainWindow):
         if event.button() == Qt.LeftButton:
             print('Mouse released')
             self.isMouseClicked = False
-            self.update()
             
             if(self.begin.x()!=self.begin.y()):
                 bbox = (self.begin.x(), self.begin.y(), self.end.x(), self.end.y()) 
-                print(bbox)
-                self.onMouseReleased(bbox)            
+                print(f"onMouseReleased called from Overlay class with bbox: {bbox}")
+                self.onMouseReleased(bbox)
+                
+            self.end = self.begin = event.pos()
+            self.update()                 
     
     def mouseMoveEvent(self, event):
         if(self.isMouseClicked):
