@@ -1,6 +1,6 @@
 Desktop overlay translator which allows user to select area on screen for further text recognition and translation.
 
-<img src="https://github.com/user-attachments/assets/8674fa2a-4610-4f61-a873-4aee376f2a0e" width="800" height="700" />
+<img src="https://github.com/user-attachments/assets/8674fa2a-4610-4f61-a873-4aee376f2a0e" width="900" height="700" />
 
 ***
 
