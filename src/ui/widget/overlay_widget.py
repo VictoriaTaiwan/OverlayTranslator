@@ -3,12 +3,12 @@ from PyQt5 import QtGui
 from PyQt5.QtWidgets import QWidget
 
 class Overlay(QWidget):
-    def __init__(self, on_mouse_released):
+    def __init__(self, on_area_selected):
         super().__init__()
 
         self.is_drawing_mode = False
         self.is_mouse_clicked = False
-        self.on_mouse_released = on_mouse_released
+        self.on_area_selected = on_area_selected
         
         self.setWindowTitle("Overlay Translator")
         self.setMouseTracking(True)       
@@ -16,7 +16,7 @@ class Overlay(QWidget):
         # Window flags for frameless, transparent, hidden from taskbar and always-on-top window
         self.setWindowFlags(Qt.ToolTip | Qt.WindowStaysOnTopHint| Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setAttribute(Qt.WA_TransparentForMouseEvents, not self.is_drawing_mode)
+        #self.setAttribute(Qt.WA_TransparentForMouseEvents, not self.is_drawing_mode)
         self.showFullScreen()               
         
         self.begin = QPoint()
@@ -62,7 +62,7 @@ class Overlay(QWidget):
             if(self.begin.x()!=self.begin.y()):
                 bbox = (self.begin.x(), self.begin.y(), self.end.x(), self.end.y()) 
                 print(f"onMouseReleased called from Overlay class with bbox: {bbox}")
-                self.on_mouse_released(bbox)
+                self.on_area_selected(bbox)
                 
             self.end = self.begin = event.pos()
             self.update()                 
