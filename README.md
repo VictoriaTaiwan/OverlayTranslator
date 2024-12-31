@@ -6,6 +6,6 @@ Desktop overlay translator which allows user to select area on screen for furthe
 
 Global hotkeys for area selection and app visibility can be changed anytime along with translation service (DeepL, Google) and target language.
 
-<img src="https://github.com/user-attachments/assets/090d9a65-1265-4e85-9a53-678851de465f" width="700" height="600" />
+<img src="https://github.com/user-attachments/assets/abdd92d7-01cb-4597-b58e-912b8209f792" width="700" height="600" />
 
 <img src="https://github.com/user-attachments/assets/4287bd89-1a5b-4bc8-a9c5-1479ac86936f" width="700" height="600" />
