@@ -30,23 +30,23 @@ class Main:
         self.app.create_tray()  
         
     DEFAULT_DATA = {
-        DATA_KEY.SELECT_AREA: "<alt>+x",
-        DATA_KEY.TOGGLE_OVERLAY: "<alt>+n",
-        DATA_KEY.TARGET_LANGUAGE: LANGUAGE.ENGLISH.value,
-        DATA_KEY.TRANSLATOR_SERVICE: SERVICE.DEEPL.value
+        DATA_KEY.SELECT_AREA.value: "<alt>+x",
+        DATA_KEY.TOGGLE_OVERLAY.value: "<alt>+n",
+        DATA_KEY.TARGET_LANGUAGE.value: LANGUAGE.ENGLISH.value,
+        DATA_KEY.TRANSLATOR_SERVICE.value: SERVICE.DEEPL.value
     }     
     
     def init_app_data(self):
         self.data = {key: self.config_helper.get_data(key, default)
                     for key, default in self.DEFAULT_DATA.items()}
         
-        self.target_language = LANGUAGE(int(self.data[DATA_KEY.TARGET_LANGUAGE]))
-        self.service = SERVICE(int(self.data[DATA_KEY.TRANSLATOR_SERVICE]))                
+        self.target_language = LANGUAGE(int(self.data[DATA_KEY.TARGET_LANGUAGE.value]))
+        self.service = SERVICE(int(self.data[DATA_KEY.TRANSLATOR_SERVICE.value]))                
     
     def init_global_hotkeys(self):
         self.global_hotkeys = GlobalHotKeys({
-            self.data[DATA_KEY.SELECT_AREA]: lambda: self.app.toggle_drawing_mode(),
-            self.data[DATA_KEY.TOGGLE_OVERLAY]: lambda: self.app.toggle_app_visibility()
+            self.data[DATA_KEY.SELECT_AREA.value]: lambda: self.app.toggle_drawing_mode(),
+            self.data[DATA_KEY.TOGGLE_OVERLAY.value]: lambda: self.app.toggle_app_visibility()
         })
         self.global_hotkeys.start()         
     

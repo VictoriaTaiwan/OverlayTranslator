@@ -2,7 +2,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QFormLayout, QVBoxLayout, QSizePolicy, QComboBox
 from ..common.hotkey_field import HotkeyField
-from functools import partial
 from util.data_keys import DATA_KEY
 from src.data.translation.service import SERVICE
 from data.translation.language import LANGUAGE
@@ -19,8 +18,8 @@ class OptionsWidget(QWidget):
         self.form_layout.setVerticalSpacing(20)
         main_container.addLayout(self.form_layout)
         
-        for key in [DATA_KEY.SELECT_AREA, DATA_KEY.TOGGLE_OVERLAY]:
-            self.add_hotkey_field(key)       
+        for config_key in [DATA_KEY.SELECT_AREA, DATA_KEY.TOGGLE_OVERLAY]:
+            self.add_hotkey_field(config_key)       
         
         self.add_languages_box()
         self.add_services_box()
@@ -31,12 +30,12 @@ class OptionsWidget(QWidget):
         main_container.addWidget(submit_button, alignment=Qt.AlignCenter)
                 
         main_container.addStretch(1) # Spacer
-
-    def add_hotkey_field(self, key: str):
-        label = QLabel(text=key, parent=self)
+    
+    def add_hotkey_field(self, config_key: str):
+        label = QLabel(text=config_key.visible_name, parent=self)
         text_field = HotkeyField(
-            on_value_changed=partial(self.on_data_value_changed, key),
-            initial_value=self.data.get(key, ""),
+            on_value_changed=lambda value: self.on_data_value_changed(config_key.value, value),
+            initial_value=self.data.get(config_key.value, ""),
             parent=self
         ) 
         self.form_layout.addRow(label, text_field)
@@ -49,9 +48,9 @@ class OptionsWidget(QWidget):
         languages_box.setInsertPolicy(QComboBox.NoInsert)
         
         languages_box.currentIndexChanged.connect(
-            lambda index:self.on_data_value_changed(DATA_KEY.TARGET_LANGUAGE, index)
+            lambda index:self.on_data_value_changed(DATA_KEY.TARGET_LANGUAGE.value, index)
             )
-        current_index_str = self.data[DATA_KEY.TARGET_LANGUAGE]
+        current_index_str = self.data[DATA_KEY.TARGET_LANGUAGE.value]
         languages_box.setCurrentIndex(int(current_index_str))       
         self.form_layout.addRow(language_label, languages_box)
         
@@ -63,9 +62,9 @@ class OptionsWidget(QWidget):
         services_box.setInsertPolicy(QComboBox.NoInsert)
         
         services_box.currentIndexChanged.connect(
-            lambda index:self.on_data_value_changed(DATA_KEY.TRANSLATOR_SERVICE, index)
+            lambda index:self.on_data_value_changed(DATA_KEY.TRANSLATOR_SERVICE.value, index)
             )
-        current_index_str = self.data[DATA_KEY.TRANSLATOR_SERVICE]
+        current_index_str = self.data[DATA_KEY.TRANSLATOR_SERVICE.value]
         services_box.setCurrentIndex(int(current_index_str))
         self.form_layout.addRow(services_label, services_box)
         

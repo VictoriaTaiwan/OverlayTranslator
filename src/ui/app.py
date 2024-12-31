@@ -24,18 +24,18 @@ class App(QApplication):
         self.tabbed_widget.setWindowTitle("Overlay Translator")
         self.tabbed_widget.setMinimumSize(400, 400) 
         
-        self.optionsWidget = OptionsWidget(initial_data, on_save_data)
+        self.options_widget = OptionsWidget(initial_data, on_save_data)
         self.translator_widget = TranslatorWidget()
         
         self.tabbed_widget.addTab(self.translator_widget, "Translator")
-        self.tabbed_widget.addTab(self.optionsWidget, "Options")
+        self.tabbed_widget.addTab(self.options_widget, "Options")
         
         topLeftPoint = self.desktop().availableGeometry().topLeft()
         self.tabbed_widget.move(topLeftPoint)
-        self.tabbed_widget.closeEvent = self.on_tabbed_widget_close
-        self.tabbed_widget.show()
+        self.tabbed_widget.closeEvent = self.on_tabbed_widget_quit
+        self.tabbed_widget.show()     
     
-    def on_tabbed_widget_close(self, event):
+    def on_tabbed_widget_quit(self, event):
         self.set_app_visible(False)
         event.ignore()
     
