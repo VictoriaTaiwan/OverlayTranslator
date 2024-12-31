@@ -54,15 +54,13 @@ class Main:
     
     def initUI(self):
         self.app = QApplication(sys.argv)        
-        self.overlay = Overlay(self.start_translation)
-        self.overlay.show()        
+        self.overlay = Overlay(self.start_translation)    
         self.create_tabbed_widget()                                 
-        self.create_tray()
-        sys.exit(self.app.exec())
+        self.create_tray()        
     
     def create_tabbed_widget(self):    
         self.tabbed_widget = QTabWidget()
-        self.tabbed_widget.setWindowFlags(Qt.Tool | Qt.WindowStaysOnTopHint)
+        self.tabbed_widget.setWindowFlags(Qt.Tool| Qt.WindowStaysOnTopHint)
         self.tabbed_widget.setWindowTitle("Overlay Translator")
         self.tabbed_widget.setMinimumSize(400, 400) 
         
@@ -74,7 +72,12 @@ class Main:
         
         topLeftPoint = self.app.desktop().availableGeometry().topLeft()
         self.tabbed_widget.move(topLeftPoint)
+        self.tabbed_widget.closeEvent = self.on_tabbed_widget_close
         self.tabbed_widget.show()
+    
+    def on_tabbed_widget_close(self, event):
+        self.set_app_visible(False)
+        event.ignore()
     
     def create_tray(self):         
         tray = QSystemTrayIcon(QIcon("src/res/penguin.png"), self.app)         
@@ -92,6 +95,7 @@ class Main:
         # Adding options to the System Tray 
         tray.setContextMenu(menu) 
         tray.setVisible(True)
+        sys.exit(self.app.exec())
         
     def quit(self):
         print("Quit app")

@@ -1,22 +1,23 @@
 from PyQt5.QtCore import Qt, QRect, QPoint
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QWidget
 
-class Overlay(QMainWindow):
+class Overlay(QWidget):
     def __init__(self, on_mouse_released):
         super().__init__()
 
-        self.setWindowTitle("Overlay Translator")
-        self.setMouseTracking(True)
-        self.on_mouse_released = on_mouse_released
-
-        # Window flags for frameless, transparent, hidden from taskbar and always-on-top window
-        self.setWindowFlags(Qt.Tool| Qt.WindowStaysOnTopHint| Qt.FramelessWindowHint)
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.showFullScreen()
-        
         self.is_drawing_mode = False
         self.is_mouse_clicked = False
+        self.on_mouse_released = on_mouse_released
+        
+        self.setWindowTitle("Overlay Translator")
+        self.setMouseTracking(True)       
+
+        # Window flags for frameless, transparent, hidden from taskbar and always-on-top window
+        self.setWindowFlags(Qt.ToolTip | Qt.WindowStaysOnTopHint| Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAttribute(Qt.WA_TransparentForMouseEvents, not self.is_drawing_mode)
+        self.showFullScreen()               
         
         self.begin = QPoint()
         self.end = QPoint()
