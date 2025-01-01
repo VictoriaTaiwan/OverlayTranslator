@@ -3,7 +3,7 @@ import cv2
 import numpy
 from PIL import Image
 
-tessdata_path = r"C:\Program Files\Tesseract-OCR\tessdata"  # Path to tessdata folder
+tessdata_path = r"src\res\tessdata"  # Path to tessdata folder
 
 class Ocr():   
     def image_to_text(self, image):

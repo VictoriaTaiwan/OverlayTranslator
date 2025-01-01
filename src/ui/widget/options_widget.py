@@ -2,7 +2,7 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QFormLayout, QVBoxLayout, QSizePolicy, QComboBox
 from ..common.hotkey_field import HotkeyField
-from util.data_keys import DATA_KEY
+from config.data_keys import DATA_KEY
 from src.data.translation.service import SERVICE
 from data.translation.language import LANGUAGE
 

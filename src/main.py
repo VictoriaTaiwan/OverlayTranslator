@@ -7,8 +7,8 @@ from data.ocr.tesseract import Ocr
 from data.translation.translator import Translator
 from src.data.translation.service import SERVICE
 from data.translation.language import LANGUAGE
-from util.config_helper import ConfigHelper
-from util.data_keys import DATA_KEY
+from config.config_helper import ConfigHelper
+from config.data_keys import DATA_KEY
 
 from pynput.keyboard import GlobalHotKeys
 from ui.app import App
@@ -61,6 +61,8 @@ class Main:
             self.config_helper.save_data(key, value)
         
         self.init_app_data()
+        self.translator.target_language = self.target_language
+        self.translator.service = self.service
         self.global_hotkeys.stop()
         self.init_global_hotkeys() 
     
