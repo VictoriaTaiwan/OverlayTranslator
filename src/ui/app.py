@@ -18,7 +18,7 @@ class App(QApplication):
     def create_overlay(self, on_area_selected):
         self.overlay = Overlay(on_area_selected)     
         
-    def create_tabbed_widget(self, initial_data, on_save_data):    
+    def create_tabbed_widget(self, initial_data, on_save_data):            
         self.tabbed_widget = QTabWidget()
         self.tabbed_widget.setWindowFlags(Qt.Tool| Qt.WindowStaysOnTopHint)
         self.tabbed_widget.setWindowTitle("Overlay Translator")
@@ -33,7 +33,14 @@ class App(QApplication):
         topLeftPoint = self.desktop().availableGeometry().topLeft()
         self.tabbed_widget.move(topLeftPoint)
         self.tabbed_widget.closeEvent = self.on_tabbed_widget_quit
-        self.tabbed_widget.show()     
+        self.tabbed_widget.currentChanged.connect(lambda: self.on_tab_changed())
+        self.tabbed_widget.show()
+    
+    def on_tab_changed(self):
+        print("has changed tab")        
+        if(self.options_widget.is_data_saved() == False):
+            print("change data")
+            self.options_widget.resetData()          
     
     def on_tabbed_widget_quit(self, event):
         self.set_app_visible(False)

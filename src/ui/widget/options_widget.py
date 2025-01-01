@@ -9,7 +9,13 @@ from data.translation.language import LANGUAGE
 class OptionsWidget(QWidget):
     def __init__(self, data: dict, on_save_data: callable):
         super().__init__()
-        self.data = data                                       
+        
+        self.on_save_data = on_save_data
+        self.last_data = dict(data)
+        self.current_data = dict(data)
+        
+        self.text_fields = {}
+        self.combo_boxes = {}                                       
         
         main_container = QVBoxLayout(self)
         main_container.addStretch(1) # Spacer
@@ -18,59 +24,73 @@ class OptionsWidget(QWidget):
         self.form_layout.setVerticalSpacing(20)
         main_container.addLayout(self.form_layout)
         
-        for config_key in [DATA_KEY.SELECT_AREA, DATA_KEY.TOGGLE_OVERLAY]:
-            self.add_hotkey_field(config_key)       
+        self.add_hotkey_field_row(DATA_KEY.SELECT_AREA)
+        self.add_hotkey_field_row(DATA_KEY.TOGGLE_OVERLAY)       
         
-        self.add_languages_box()
-        self.add_services_box()
+        languageNames = list(map(lambda lang:lang.language_name, list(LANGUAGE)))
+        self.add_combo_box_row(DATA_KEY.TARGET_LANGUAGE, languageNames)
+        
+        serviceNames = list(map(lambda service:service.service_name, list(SERVICE)))
+        self.add_combo_box_row(DATA_KEY.TRANSLATOR_SERVICE, serviceNames)
         
         submit_button = QPushButton("Save")
         submit_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        submit_button.clicked.connect(lambda: on_save_data(self.data))
+        submit_button.clicked.connect(lambda: self.on_save_options())
         main_container.addWidget(submit_button, alignment=Qt.AlignCenter)
                 
         main_container.addStretch(1) # Spacer
     
-    def add_hotkey_field(self, config_key: str):
+    def is_data_saved(self) -> bool:
+        return list(self.last_data.values()) == list(self.current_data.values())
+    
+    def on_save_options(self):
+        self.on_save_data(self.current_data)
+        self.last_data = dict(self.current_data)    
+    
+    def resetData(self):
+        for config_key_name, text_field in self.text_fields.items():
+            text_field.setText(self.last_data[config_key_name])
+        
+        for config_key_name, combo_box in self.combo_boxes.items():
+            data_index_str = self.last_data[config_key_name]
+            combo_box.setCurrentIndex(int(data_index_str))  
+    
+    def add_hotkey_field_row(self, config_key: DATA_KEY):
         label = QLabel(text=config_key.visible_name, parent=self)
+        
         text_field = HotkeyField(
             on_value_changed=lambda value: self.on_data_value_changed(config_key.value, value),
-            initial_value=self.data.get(config_key.value, ""),
+            initial_value=self.current_data.get(config_key.value, ""),
             parent=self
         ) 
+        
         self.form_layout.addRow(label, text_field)
         
-    def add_languages_box(self):
-        language_label = QLabel(text="Target language")
-        languages_box = QComboBox(self)        
-        for language in LANGUAGE:
-            languages_box.addItem(language.language_name)
-        languages_box.setInsertPolicy(QComboBox.NoInsert)
+        self.text_fields[config_key.value] = text_field        
         
-        languages_box.currentIndexChanged.connect(
-            lambda index:self.on_data_value_changed(DATA_KEY.TARGET_LANGUAGE.value, index)
+    def add_combo_box_row(self, config_key: DATA_KEY, list: list):
+        label = QLabel(text=config_key.visible_name)
+        
+        combo_box = QComboBox(self)
+        combo_box.setInsertPolicy(QComboBox.NoInsert)        
+        
+        for item in list:
+            combo_box.addItem(item)       
+        
+        combo_box.currentIndexChanged.connect(
+            lambda index:self.on_data_value_changed(config_key.value, str(index))
             )
-        current_index_str = self.data[DATA_KEY.TARGET_LANGUAGE.value]
-        languages_box.setCurrentIndex(int(current_index_str))       
-        self.form_layout.addRow(language_label, languages_box)
         
-    def add_services_box(self):      
-        services_label = QLabel(text="Translation service")
-        services_box = QComboBox(self)
-        for service in SERVICE:
-            services_box.addItem(service.service_name)
-        services_box.setInsertPolicy(QComboBox.NoInsert)
+        current_index_str = self.current_data[config_key.value]
+        combo_box.setCurrentIndex(int(current_index_str))       
         
-        services_box.currentIndexChanged.connect(
-            lambda index:self.on_data_value_changed(DATA_KEY.TRANSLATOR_SERVICE.value, index)
-            )
-        current_index_str = self.data[DATA_KEY.TRANSLATOR_SERVICE.value]
-        services_box.setCurrentIndex(int(current_index_str))
-        self.form_layout.addRow(services_label, services_box)
+        self.form_layout.addRow(label, combo_box)
+        
+        self.combo_boxes[config_key.value] = combo_box
         
     def on_data_value_changed(self, key: str, value: str):
         print(f"key is {key} and value is {value}")
-        self.data[key] = value
+        self.current_data[key] = value
 
     def mousePressEvent(self, event):
         if self.focusWidget() is not None:
