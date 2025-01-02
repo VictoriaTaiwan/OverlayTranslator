@@ -14,17 +14,21 @@ class App(QApplication):
         
         self.is_drawing_mode = False
         self.is_app_visible = True
+        self.can_invoke_hotkey = True
     
     def create_overlay(self, on_area_selected):
         self.overlay = Overlay(on_area_selected)     
         
-    def create_tabbed_widget(self, initial_data, on_save_data, on_set_hotkey_focus):            
+    def create_tabbed_widget(self, initial_data, on_save_data):            
         self.tabbed_widget = QTabWidget()
         self.tabbed_widget.setWindowFlags(Qt.Tool| Qt.WindowStaysOnTopHint)
         self.tabbed_widget.setWindowTitle("Overlay Translator")
         self.tabbed_widget.setMinimumSize(400, 400) 
         
-        self.options_widget = OptionsWidget(initial_data, on_save_data, on_set_hotkey_focus)
+        self.options_widget = OptionsWidget(
+            initial_data, 
+            on_save_data, 
+            self.set_can_invoke_hotkey)
         self.translator_widget = TranslatorWidget()
         
         self.tabbed_widget.addTab(self.translator_widget, "Translator")
@@ -93,9 +97,14 @@ class App(QApplication):
         self.tabbed_widget.update()
         
     def toggle_drawing_mode(self):
-        print("Toggle drawing mode")
-        self.set_drawing_mode(not self.is_drawing_mode) 
+        if(self.can_invoke_hotkey):
+            print("Toggle drawing mode")
+            self.set_drawing_mode(not self.is_drawing_mode) 
     
     def toggle_app_visibility(self):
-        print("Toggle app visibility")
-        self.set_app_visible(not self.is_app_visible)              
+        if(self.can_invoke_hotkey):
+            print("Toggle app visibility")
+            self.set_app_visible(not self.is_app_visible)
+    
+    def set_can_invoke_hotkey(self, edit_in_progress: bool):
+        self.can_invoke_hotkey = not edit_in_progress               
