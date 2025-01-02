@@ -99,3 +99,7 @@ class OptionsWidget(QWidget):
         if self.focusWidget() is not None:
             self.focusWidget().clearFocus()
         super().mousePressEvent(event)
+    
+    def focusOutEvent(self, event):
+        self.on_set_hotkey_focus(True)
+        return super().focusOutEvent(event)    
