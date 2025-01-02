@@ -59,14 +59,27 @@ class Overlay(QWidget):
             print('Mouse released')
             self.is_mouse_clicked = False
             
-            if(self.begin.x()!=self.begin.y()):
-                bbox = (self.begin.x(), self.begin.y(), self.end.x(), self.end.y()) 
+            if self.begin!=self.end:
+                bbox = self.get_bbox()
                 print(f"onMouseReleased called from Overlay class with bbox: {bbox}")
                 self.on_area_selected(bbox)
                 
             self.end = self.begin = event.pos()
             self.update()                 
     
+    def get_bbox(self):
+        x1 = self.begin.x()
+        x2 = self.end.x()
+        y1 = self.begin.y()
+        y2 = self.end.y()
+                
+        left = min(x1, x2)
+        right = max(x1, x2)
+        top = min(y1, y2)
+        bottom = max(y1, y2)                               
+                
+        return (left, top, right, bottom)
+                
     def mouseMoveEvent(self, event):
         if(self.is_mouse_clicked):
             print('Mouse dragged')
