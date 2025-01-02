@@ -33,7 +33,7 @@ class Main:
             on_save_data = self.on_save_data,
             on_set_hotkey_focus = self.set_can_invoke_hotkey
             )
-        self.app.create_tray()  
+        self.app.create_tray(self.on_app_quit)  
         
     DEFAULT_DATA = {
         DATA_KEY.SELECT_AREA.value: "<alt>+x",
@@ -63,7 +63,7 @@ class Main:
         if(self.can_invoke_hotkey):
             func()
     
-    def quit(self):
+    def on_app_quit(self):
         print("Quit app")
         self.global_hotkeys.stop()  # Stop global hotkeys
         self.app.quit()       

@@ -46,7 +46,7 @@ class App(QApplication):
         self.set_app_visible(False)
         event.ignore()
     
-    def create_tray(self):         
+    def create_tray(self, on_app_quit):         
         tray = QSystemTrayIcon(QIcon("src/res/images/penguin.png"), self)         
         menu = QMenu() 
         
@@ -56,7 +56,7 @@ class App(QApplication):
     
         # To quit the app 
         quit = QAction("Quit") 
-        quit.triggered.connect(self.quit) 
+        quit.triggered.connect(on_app_quit) 
         menu.addAction(quit)   
     
         # Adding options to the System Tray 
