@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMenu, QAction, QSystemTrayIcon, QTabWidget
 
-from src.ui.widget.overlay_widget import Overlay
+from src.ui.widget.overlay import Overlay
 from src.ui.widget.options_widget import OptionsWidget
 from src.ui.widget.translator_widget import TranslatorWidget
 
@@ -18,13 +18,13 @@ class App(QApplication):
     def create_overlay(self, on_area_selected):
         self.overlay = Overlay(on_area_selected)     
         
-    def create_tabbed_widget(self, initial_data, on_save_data):            
+    def create_tabbed_widget(self, initial_data, on_save_data, on_set_hotkey_focus):            
         self.tabbed_widget = QTabWidget()
         self.tabbed_widget.setWindowFlags(Qt.Tool| Qt.WindowStaysOnTopHint)
         self.tabbed_widget.setWindowTitle("Overlay Translator")
         self.tabbed_widget.setMinimumSize(400, 400) 
         
-        self.options_widget = OptionsWidget(initial_data, on_save_data)
+        self.options_widget = OptionsWidget(initial_data, on_save_data, on_set_hotkey_focus)
         self.translator_widget = TranslatorWidget()
         
         self.tabbed_widget.addTab(self.translator_widget, "Translator")

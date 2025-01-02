@@ -19,6 +19,8 @@ class Main:
         self.config_helper = ConfigHelper()       
         self.init_app_data()
         
+        self.can_invoke_hotkey = True
+        
         self.app = App(args=sys.argv)    
         self.init_global_hotkeys()
         
@@ -26,7 +28,11 @@ class Main:
         self.ocr = Ocr()          
         
         self.app.create_overlay(on_area_selected=self.start_translation)
-        self.app.create_tabbed_widget(initial_data=self.data, on_save_data=self.on_save_data)
+        self.app.create_tabbed_widget(
+            initial_data = self.data, 
+            on_save_data = self.on_save_data,
+            on_set_hotkey_focus = self.set_can_invoke_hotkey
+            )
         self.app.create_tray()  
         
     DEFAULT_DATA = {
@@ -45,10 +51,17 @@ class Main:
     
     def init_global_hotkeys(self):
         self.global_hotkeys = GlobalHotKeys({
-            self.data[DATA_KEY.SELECT_AREA.value]: lambda: self.app.toggle_drawing_mode(),
-            self.data[DATA_KEY.TOGGLE_OVERLAY.value]: lambda: self.app.toggle_app_visibility()
+            self.data[DATA_KEY.SELECT_AREA.value]: lambda: self.invoke_hotkey(self.app.toggle_drawing_mode),
+            self.data[DATA_KEY.TOGGLE_OVERLAY.value]: lambda: self.invoke_hotkey(self.app.toggle_app_visibility)
         })
         self.global_hotkeys.start()         
+    
+    def set_can_invoke_hotkey(self, edit_in_progress: bool):
+        self.can_invoke_hotkey = not edit_in_progress
+        
+    def invoke_hotkey(self, func):
+        if(self.can_invoke_hotkey):
+            func()
     
     def quit(self):
         print("Quit app")

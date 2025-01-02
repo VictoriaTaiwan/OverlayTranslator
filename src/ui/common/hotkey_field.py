@@ -1,19 +1,29 @@
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtCore import Qt
 class HotkeyField(QLineEdit):
-    def __init__(self, on_value_changed, initial_value ='', parent=None):
+    def __init__(self, on_value_changed, on_set_focus, initial_value ='', parent=None):
         super().__init__(parent)
-        self.setReadOnly(True)
-        self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
-        self.setText(initial_value)
         
         self.on_value_changed=on_value_changed
+        self.on_set_focus = on_set_focus
+        
+        self.setReadOnly(True)
+        self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
+        self.setText(initial_value)        
         self.setStyleSheet("""
             QLineEdit:focus {
                 background-color: #F9E87C;
                 border: 1px solid #FF9340;
             }
         """)           
+
+    def focusInEvent(self, event):
+        self.on_set_focus(True)
+        return super().focusInEvent(event)
+    
+    def focusOutEvent(self, event):
+        self.on_set_focus(False)
+        return super().focusOutEvent(event)
 
     def keyPressEvent(self, event):
         if self.hasFocus():

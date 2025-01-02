@@ -7,10 +7,12 @@ from src.data.translation.service import SERVICE
 from data.translation.language import LANGUAGE
 
 class OptionsWidget(QWidget):
-    def __init__(self, data: dict, on_save_data: callable):
+    def __init__(self, data: dict, on_save_data: callable, on_set_hotkey_focus):
         super().__init__()
         
         self.on_save_data = on_save_data
+        self.on_set_hotkey_focus = on_set_hotkey_focus
+        
         self.last_data = dict(data)
         self.current_data = dict(data)
         
@@ -60,6 +62,7 @@ class OptionsWidget(QWidget):
         
         text_field = HotkeyField(
             on_value_changed=lambda value: self.on_data_value_changed(config_key.value, value),
+            on_set_focus=self.on_set_hotkey_focus,
             initial_value=self.current_data.get(config_key.value, ""),
             parent=self
         ) 
