@@ -47,6 +47,19 @@ class TranslatorWidget(QWidget):
     def set_translated_text(self, text):
         self.translationField.setText(text)
     
+    def reset(self):       
+        self.set_ocr_text('')
+        self.set_translated_text('')
+        self.update_status('Recognizing text...')
+    
+    def update_ocr_status(self, ocrResult):                                     
+        self.update_status('Translating text...')
+        self.set_ocr_text(ocrResult)
+    
+    def update_translation_status(self, translation):
+        self.update_status('')
+        self.set_translated_text(translation)    
+    
     def mousePressEvent(self, event):
         if self.focusWidget() is not None:
             self.focusWidget().clearFocus()
