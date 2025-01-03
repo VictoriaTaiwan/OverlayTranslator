@@ -1,4 +1,5 @@
-Tray overlay translator for desktops which allows user to select area on screen for further text recognition and translation. 
+Overlay translator for desktops which allows user to select area on screen for further text recognition and translation. 
+By default user can select on screen area by pressing Alt+X and toggle App visibility by pressing Alt+N. App hides itself in the system tray.
 
 <img src="https://github.com/user-attachments/assets/8674fa2a-4610-4f61-a873-4aee376f2a0e"/>
 
