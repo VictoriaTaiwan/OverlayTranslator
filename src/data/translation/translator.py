@@ -1,7 +1,7 @@
 
 import requests
 from auth.keys import deepl_api_key
-from src.data.translation.service import SERVICE
+from data.translation.service import SERVICE
 from data.translation.language import LANGUAGE
 import urllib.parse as encoder
 class Translator:

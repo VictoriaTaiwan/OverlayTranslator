@@ -11,7 +11,6 @@ from config.config_helper import ConfigHelper
 from config.data_keys import DATA_KEY
 
 from ui.app import App
-from src.ui.threads.translation_thread import TranslationThread
 
 DEFAULT_DATA = {
         DATA_KEY.SELECT_AREA.value: "<alt>+x",
@@ -29,9 +28,10 @@ class Main:
         self.ocr = Ocr()
         
         self.app = App(
-            args=sys.argv, data=self.data, 
-            on_save_data=self.on_save_data, 
-            on_area_selected=self.start_translation
+            args = sys.argv, data = self.data, 
+            on_save_data = self.on_save_data,
+            on_ocr = self.ocr.image_to_text, 
+            on_translate = self.translator.translate
             )           
     
     def init_app_data(self):
@@ -50,16 +50,6 @@ class Main:
         
         self.translator.target_language = self.target_language
         self.translator.service = self.service
-    
-    def start_translation(self, bbox, on_ocr_received, on_translation_received):                     
-        self.thread = TranslationThread(self.ocr.image_to_text, self.translator.translate, bbox)
-                
-        self.thread.ocr_result.connect(on_ocr_received)
-        self.thread.translation_result.connect(on_translation_received)
-        
-        self.thread.finished.connect(self.thread.deleteLater)
-        self.thread.finished.connect(lambda: print("Background thread finished its work."))
-        self.thread.start()           
         
 if __name__ == "__main__":
     main = Main()

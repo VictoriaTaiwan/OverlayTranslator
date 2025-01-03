@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QTextEdit, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QTextEdit, QLabel, QVBoxLayout, QHBoxLayout
 
 class TranslatorWidget(QWidget):
     def __init__(self):
@@ -22,12 +22,6 @@ class TranslatorWidget(QWidget):
         translation_layout.addWidget(translation_label, alignment=Qt.AlignCenter)
         translation_layout.addWidget(self.translationField)
         
-        #hideOcrButton = QPushButton("Hide recognized text")
-        #hideOcrButton.clicked.connect(lambda: ocrLayout.)
-        
-        #translateButton = QPushButton("Translate")
-        #translateButton.clicked.connect(lambda: onTranslate(text))
-        
         text_fields_layout = QHBoxLayout()
         text_fields_layout.addLayout(ocr_layout)
         text_fields_layout.addLayout(translation_layout)
@@ -36,29 +30,19 @@ class TranslatorWidget(QWidget):
         self.status_label = QLabel('')
         self.layout.addWidget(self.status_label, alignment=Qt.AlignCenter)
         self.layout.addLayout(text_fields_layout)
-        #self.layout.addWidget(translateButton)
     
-    def update_status(self, text):
-        self.status_label.setText(text)
-    
-    def set_ocr_text(self, text):
-        self.ocr_field.setText(text)
-    
-    def set_translated_text(self, text):
-        self.translationField.setText(text)
-    
-    def reset(self):       
-        self.set_ocr_text('')
-        self.set_translated_text('')
-        self.update_status('Recognizing text...')
+    def reset(self): 
+        self.status_label.setText('Recognizing text...')      
+        self.ocr_field.setText('')
+        self.translationField.setText('')        
     
     def update_ocr_status(self, ocrResult):                                     
-        self.update_status('Translating text...')
-        self.set_ocr_text(ocrResult)
+        self.status_label.setText('Translating text...')
+        self.ocr_field.setText(ocrResult)
     
     def update_translation_status(self, translation):
-        self.update_status('')
-        self.set_translated_text(translation)    
+        self.status_label.setText('')
+        self.translationField.setText(translation)    
     
     def mousePressEvent(self, event):
         if self.focusWidget() is not None:

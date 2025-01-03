@@ -8,33 +8,39 @@ from config.data_keys import DATA_KEY
 from .widget.overlay import Overlay
 from .widget.options_widget import OptionsWidget
 from .widget.translator_widget import TranslatorWidget
+from .threads.translation_thread import TranslationThread
 
 class App(QApplication):
-    def __init__(self, args, data, on_save_data, on_area_selected):
+    def __init__(self, args, data, on_save_data, on_ocr, on_translate):
         super(App, self).__init__(args)
         
         self.data = data
         self.on_save_data = on_save_data
-        self.on_area_selected = on_area_selected
+        self.on_ocr = on_ocr
+        self.on_translate = on_translate
         
         self.is_drawing_mode = False
         self.is_app_visible = True
         
         self.init_global_hotkeys(data)
         
-        self.overlay = Overlay(lambda bbox: self.on_update_selected(bbox))
+        self.overlay = Overlay(self.on_area_selected)
         self.create_tabbed_widget()
         self.create_tray()
         self.exec_()
     
-    def on_update_selected(self, bbox):
+    def on_area_selected(self, image):
         self.set_app_visible(True)
         self.set_drawing_mode(False)       
-        self.translator_widget.reset()   
+        self.translator_widget.reset()                              
         
-        self.on_area_selected(bbox, 
-            lambda ocr_result: self.translator_widget.update_ocr_status(ocr_result),
-            lambda translation: self.translator_widget.update_translation_status(translation))
+        self.thread = TranslationThread(image, self.on_ocr, self.on_translate)                
+        self.thread.ocr_result.connect(self.translator_widget.update_ocr_status)
+        self.thread.translation_result.connect(self.translator_widget.update_translation_status)
+        
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.finished.connect(lambda: print("Background thread finished its work."))
+        self.thread.start()
             
     def on_save_and_restart(self, data):
         self.init_global_hotkeys(data)
@@ -63,7 +69,7 @@ class App(QApplication):
         self.tabbed_widget.setMinimumSize(400, 400) 
         
         self.options_widget = OptionsWidget(self.data, self.on_save_and_restart)
-        self.translator_widget = TranslatorWidget()
+        self.translator_widget = TranslatorWidget() # Can add on_translate / on_ocr retry functionality
         
         self.tabbed_widget.addTab(self.translator_widget, "Translator")
         self.tabbed_widget.addTab(self.options_widget, "Options")
@@ -76,7 +82,7 @@ class App(QApplication):
     
     def on_tab_changed(self):      
         if(not self.options_widget.is_data_saved()):
-            self.options_widget.resetData()          
+            self.options_widget.reset_data()          
     
     def on_tabbed_widget_quit(self, event):
         self.set_app_visible(False)

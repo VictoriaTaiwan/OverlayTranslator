@@ -1,6 +1,7 @@
 from PyQt5.QtCore import Qt, QRect, QPoint
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QWidget
+from PIL import ImageGrab
 
 class Overlay(QWidget):
     def __init__(self, on_area_selected):
@@ -62,7 +63,7 @@ class Overlay(QWidget):
             if self.begin!=self.end:
                 bbox = self.get_bbox()
                 print(f"onMouseReleased called from Overlay class with bbox: {bbox}")
-                self.on_area_selected(bbox)
+                self.on_area_selected(ImageGrab.grab(bbox))
                 
             self.end = self.begin = event.pos()
             self.update()                 

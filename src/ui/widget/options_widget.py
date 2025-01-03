@@ -29,15 +29,15 @@ class OptionsWidget(QWidget):
         self.add_hotkey_field_row(DATA_KEY.SELECT_AREA)
         self.add_hotkey_field_row(DATA_KEY.TOGGLE_OVERLAY)       
         
-        languageNames = list(map(lambda lang:lang.language_name, list(LANGUAGE)))
+        languageNames = [lang.language_name for lang in LANGUAGE]
         self.add_combo_box_row(DATA_KEY.TARGET_LANGUAGE, languageNames)
         
-        serviceNames = list(map(lambda service:service.service_name, list(SERVICE)))
+        serviceNames = [service.service_name for service in SERVICE]
         self.add_combo_box_row(DATA_KEY.TRANSLATOR_SERVICE, serviceNames)
         
         submit_button = QPushButton("Save")
         submit_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        submit_button.clicked.connect(lambda: self.on_save_options())
+        submit_button.clicked.connect(self.on_save_options)
         main_container.addWidget(submit_button, alignment=Qt.AlignCenter)
                 
         main_container.addStretch(1) # Spacer
@@ -49,7 +49,7 @@ class OptionsWidget(QWidget):
         self.on_save_data(self.current_data)
         self.last_data = dict(self.current_data)    
     
-    def resetData(self):
+    def reset_data(self):
         for config_key_name, text_field in self.text_fields.items():
             text_field.setText(self.last_data[config_key_name])
         

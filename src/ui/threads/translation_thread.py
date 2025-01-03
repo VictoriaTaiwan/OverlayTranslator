@@ -1,4 +1,3 @@
-from PIL import ImageGrab
 from PyQt5.QtCore import QThread, pyqtSignal
 
 class TranslationThread(QThread):
@@ -6,16 +5,15 @@ class TranslationThread(QThread):
     ocr_result = pyqtSignal(str)
     translation_result = pyqtSignal(str)
     
-    def __init__(self, on_ocr, on_translate, bbox):
+    def __init__(self, image, on_ocr, on_translate):
         super(TranslationThread, self).__init__()
-        self.bbox = bbox
+        self.image = image
         self.on_ocr = on_ocr
         self.on_translate = on_translate
 
     def run(self):
         try:
-            capturedImage = ImageGrab.grab(bbox=self.bbox) 
-            ocrResult = self.on_ocr(capturedImage)
+            ocrResult = self.on_ocr(self.image)
             print("Received Ocr result")
             self.ocr_result.emit(ocrResult)
                 
