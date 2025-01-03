@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from data.ocr.tesseract import Ocr
 from data.translation.translator import Translator
-from src.data.translation.service import SERVICE
+from data.translation.service import SERVICE
 from data.translation.language import LANGUAGE
 from config.config_helper import ConfigHelper
 from config.data_keys import DATA_KEY

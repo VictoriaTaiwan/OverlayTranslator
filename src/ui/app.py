@@ -5,9 +5,9 @@ from PyQt5.QtWidgets import QApplication, QMenu, QAction, QSystemTrayIcon, QTabW
 from pynput.keyboard import GlobalHotKeys
 from config.data_keys import DATA_KEY
 
-from src.ui.widget.overlay import Overlay
-from src.ui.widget.options_widget import OptionsWidget
-from src.ui.widget.translator_widget import TranslatorWidget
+from .widget.overlay import Overlay
+from .widget.options_widget import OptionsWidget
+from .widget.translator_widget import TranslatorWidget
 
 class App(QApplication):
     def __init__(self, args, data, on_save_data, on_area_selected):
@@ -19,7 +19,6 @@ class App(QApplication):
         
         self.is_drawing_mode = False
         self.is_app_visible = True
-        self.can_invoke_hotkey = True
         
         self.init_global_hotkeys(data)
         
@@ -63,10 +62,7 @@ class App(QApplication):
         self.tabbed_widget.setWindowTitle("Overlay Translator")
         self.tabbed_widget.setMinimumSize(400, 400) 
         
-        self.options_widget = OptionsWidget(
-            self.data, self.on_save_and_restart, 
-            self.set_can_invoke_hotkey
-            )
+        self.options_widget = OptionsWidget(self.data, self.on_save_and_restart)
         self.translator_widget = TranslatorWidget()
         
         self.tabbed_widget.addTab(self.translator_widget, "Translator")
@@ -120,8 +116,5 @@ class App(QApplication):
         self.tabbed_widget.update()
     
     def toggle_mode(self, current_mode, setter):
-        if(self.can_invoke_hotkey):
-            setter(not current_mode)
-    
-    def set_can_invoke_hotkey(self, edit_in_progress: bool):
-        self.can_invoke_hotkey = not edit_in_progress               
+        if(not self.options_widget.any_hotkey_focused):
+            setter(not current_mode)            

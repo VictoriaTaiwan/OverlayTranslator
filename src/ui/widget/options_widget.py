@@ -3,15 +3,15 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QFormLayout, QVBoxLayout, QSizePolicy, QComboBox
 from ..common.hotkey_field import HotkeyField
 from config.data_keys import DATA_KEY
-from src.data.translation.service import SERVICE
+from data.translation.service import SERVICE
 from data.translation.language import LANGUAGE
 
 class OptionsWidget(QWidget):
-    def __init__(self, data: dict, on_save_data: callable, on_set_hotkey_focus):
+    def __init__(self, data: dict, on_save_data: callable):
         super().__init__()
         
         self.on_save_data = on_save_data
-        self.on_set_hotkey_focus = on_set_hotkey_focus
+        self.any_hotkey_focused = False
         
         self.last_data = dict(data)
         self.current_data = dict(data)
@@ -61,14 +61,13 @@ class OptionsWidget(QWidget):
         label = QLabel(text=config_key.visible_name, parent=self)
         
         text_field = HotkeyField(
-            on_value_changed=lambda value: self.on_data_value_changed(config_key.value, value),
-            on_set_focus=self.on_set_hotkey_focus,
-            initial_value=self.current_data.get(config_key.value, ""),
-            parent=self
-        ) 
+            on_value_changed = lambda value: self.on_data_value_changed(config_key.value, value),
+            on_set_focus = self.set_any_hotkey_focused,
+            initial_value = self.current_data.get(config_key.value, ""),
+            parent = self
+        )         
         
-        self.form_layout.addRow(label, text_field)
-        
+        self.form_layout.addRow(label, text_field)        
         self.text_fields[config_key.value] = text_field        
         
     def add_combo_box_row(self, config_key: DATA_KEY, list: list):
@@ -87,8 +86,7 @@ class OptionsWidget(QWidget):
         current_index_str = self.current_data[config_key.value]
         combo_box.setCurrentIndex(int(current_index_str))       
         
-        self.form_layout.addRow(label, combo_box)
-        
+        self.form_layout.addRow(label, combo_box)        
         self.combo_boxes[config_key.value] = combo_box
         
     def on_data_value_changed(self, key: str, value: str):
@@ -97,9 +95,9 @@ class OptionsWidget(QWidget):
 
     def mousePressEvent(self, event):
         if self.focusWidget() is not None:
+            self.any_hotkey_focused = False
             self.focusWidget().clearFocus()
         super().mousePressEvent(event)
     
-    def focusOutEvent(self, event):
-        self.on_set_hotkey_focus(True)
-        return super().focusOutEvent(event)    
+    def set_any_hotkey_focused(self, has_focus: bool):
+        self.any_hotkey_focused = has_focus
