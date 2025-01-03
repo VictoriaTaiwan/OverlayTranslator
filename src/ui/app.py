@@ -1,5 +1,3 @@
-import sys 
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMenu, QAction, QSystemTrayIcon, QTabWidget
@@ -27,7 +25,8 @@ class App(QApplication):
         
         self.overlay = Overlay(lambda bbox: self.on_update_selected(bbox))
         self.create_tabbed_widget()
-        self.create_tray() 
+        self.create_tray()
+        self.exec_()
     
     def on_update_selected(self, bbox):
         self.set_app_visible(True)
@@ -88,22 +87,21 @@ class App(QApplication):
         event.ignore()
     
     def create_tray(self):         
-        tray = QSystemTrayIcon(QIcon("src/res/images/penguin.png"), self)         
-        menu = QMenu() 
+        self.tray = QSystemTrayIcon(QIcon("src/res/images/penguin.png"), self)         
+        self.menu = QMenu() 
         
-        settings = QAction("App") 
-        settings.triggered.connect(self.tabbed_widget.show)
-        menu.addAction(settings)   
+        self.settings_action = QAction("App") 
+        self.settings_action.triggered.connect(self.tabbed_widget.show)
+        self.menu.addAction(self.settings_action)   
     
         # To quit the app 
-        quit = QAction("Quit") 
-        quit.triggered.connect(self.on_app_quit) 
-        menu.addAction(quit)   
+        self.quit_action = QAction("Quit") 
+        self.quit_action.triggered.connect(self.on_app_quit) 
+        self.menu.addAction(self.quit_action)   
     
         # Adding options to the System Tray 
-        tray.setContextMenu(menu) 
-        tray.setVisible(True)
-        sys.exit(self.exec())
+        self.tray.setContextMenu(self.menu) 
+        self.tray.setVisible(True)
     
     def on_app_quit(self):
         print("Quit app")
