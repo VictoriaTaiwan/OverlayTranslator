@@ -19,9 +19,6 @@ class App(QApplication):
         self.on_ocr = on_ocr
         self.on_translate = on_translate
         
-        self.is_drawing_mode = False
-        self.is_app_visible = True
-        
         self.init_global_hotkeys(data)
         
         self.overlay = Overlay(self.on_area_selected)
@@ -30,7 +27,7 @@ class App(QApplication):
         self.exec_()
     
     def on_area_selected(self, image):
-        self.set_app_visible(True)
+        self.tabbed_widget.setVisible(True)
         self.set_drawing_mode(False)       
         self.translator_widget.reset()                              
         
@@ -41,26 +38,25 @@ class App(QApplication):
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.finished.connect(lambda: print("Background thread finished its work."))
         self.thread.start()
-            
-    def on_save_and_restart(self, data):
-        self.init_global_hotkeys(data)
-        self.on_save_data(data)
     
-    def init_global_hotkeys(self, data):
-        try:
-            self.global_hotkeys.stop()
-        except AttributeError:
-            print("Global keys weren't initialized")
-        
+    def init_global_hotkeys(self, data):        
         self.global_hotkeys = GlobalHotKeys({
             data[DATA_KEY.SELECT_AREA.value]: lambda: self.toggle_mode(
-                self.is_drawing_mode, self.set_drawing_mode
+                self.overlay.is_drawing_mode, self.set_drawing_mode
                 ),
             data[DATA_KEY.TOGGLE_OVERLAY.value]: lambda: self.toggle_mode(
-                self.is_app_visible, self.set_app_visible
+                self.tabbed_widget.isVisible(), self.tabbed_widget.setVisible
                 )
         })
-        self.global_hotkeys.start()               
+        self.global_hotkeys.start()
+    
+    def set_drawing_mode(self, is_drawing_mode: bool):
+        self.tabbed_widget.setVisible(not is_drawing_mode)
+        self.overlay.set_drawing_mode(is_drawing_mode)
+    
+    def toggle_mode(self, current_mode, toggle_func):
+        if(not self.options_widget.any_hotkey_focused):
+            toggle_func(not current_mode)                   
         
     def create_tabbed_widget(self):            
         self.tabbed_widget = QTabWidget()
@@ -68,7 +64,7 @@ class App(QApplication):
         self.tabbed_widget.setWindowTitle("Overlay Translator")
         self.tabbed_widget.setMinimumSize(400, 400) 
         
-        self.options_widget = OptionsWidget(self.data, self.on_save_and_restart)
+        self.options_widget = OptionsWidget(self.data, self.on_save_and_restart_global_keys)
         self.translator_widget = TranslatorWidget() # Can add on_translate / on_ocr retry functionality
         
         self.tabbed_widget.addTab(self.translator_widget, "Translator")
@@ -77,15 +73,16 @@ class App(QApplication):
         topLeftPoint = self.desktop().availableGeometry().topLeft()
         self.tabbed_widget.move(topLeftPoint)
         self.tabbed_widget.closeEvent = self.on_tabbed_widget_quit
-        self.tabbed_widget.currentChanged.connect(lambda: self.on_tab_changed())
-        self.tabbed_widget.show()
+        self.tabbed_widget.currentChanged.connect(self.options_widget.reset_data)
+        self.tabbed_widget.show()         
     
-    def on_tab_changed(self):      
-        if(not self.options_widget.is_data_saved()):
-            self.options_widget.reset_data()          
-    
+    def on_save_and_restart_global_keys(self, data):
+        self.global_hotkeys.stop()
+        self.init_global_hotkeys(data)
+        self.on_save_data(data)
+        
     def on_tabbed_widget_quit(self, event):
-        self.set_app_visible(False)
+        self.tabbed_widget.setVisible(False)
         event.ignore()
     
     def create_tray(self):         
@@ -106,21 +103,5 @@ class App(QApplication):
         self.tray.setVisible(True)
     
     def on_app_quit(self):
-        print("Quit app")
         self.global_hotkeys.stop()  # Stop global hotkeys
-        self.quit()                      
-            
-    def set_drawing_mode(self, is_drawing_mode: bool):
-        self.is_drawing_mode = is_drawing_mode
-        self.tabbed_widget.setVisible(not is_drawing_mode)
-        self.tabbed_widget.update()
-        self.overlay.set_drawing_mode(is_drawing_mode)
-    
-    def set_app_visible(self, is_app_visible: bool):
-        self.is_app_visible = is_app_visible
-        self.tabbed_widget.setVisible(is_app_visible)  
-        self.tabbed_widget.update()
-    
-    def toggle_mode(self, current_mode, setter):
-        if(not self.options_widget.any_hotkey_focused):
-            setter(not current_mode)            
+        self.quit()                                  

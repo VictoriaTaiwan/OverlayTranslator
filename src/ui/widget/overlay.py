@@ -26,7 +26,6 @@ class Overlay(QWidget):
     def set_drawing_mode(self, is_drawing_mode: bool):
         self.is_drawing_mode = is_drawing_mode
         self.update()
-        print(f"Overlay {'shown' if self.is_drawing_mode else 'hidden'}") 
     
     def paintEvent(self, event):
         if not self.is_drawing_mode:
@@ -57,7 +56,6 @@ class Overlay(QWidget):
     
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            print('Mouse released')
             self.is_mouse_clicked = False
             
             if self.begin!=self.end:
@@ -83,6 +81,5 @@ class Overlay(QWidget):
                 
     def mouseMoveEvent(self, event):
         if(self.is_mouse_clicked):
-            print('Mouse dragged')
             self.end = event.pos()
             self.update()

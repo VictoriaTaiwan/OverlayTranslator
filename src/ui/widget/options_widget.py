@@ -50,12 +50,13 @@ class OptionsWidget(QWidget):
         self.last_data = dict(self.current_data)    
     
     def reset_data(self):
-        for config_key_name, text_field in self.text_fields.items():
-            text_field.setText(self.last_data[config_key_name])
+        if(not self.is_data_saved()):
+            for config_key_name, text_field in self.text_fields.items():
+                text_field.setText(self.last_data[config_key_name])
         
-        for config_key_name, combo_box in self.combo_boxes.items():
-            data_index_str = self.last_data[config_key_name]
-            combo_box.setCurrentIndex(int(data_index_str))  
+            for config_key_name, combo_box in self.combo_boxes.items():
+                data_index_str = self.last_data[config_key_name]
+                combo_box.setCurrentIndex(int(data_index_str))  
     
     def add_hotkey_field_row(self, config_key: DATA_KEY):
         label = QLabel(text=config_key.visible_name, parent=self)

@@ -10,14 +10,7 @@ from data.translation.language import LANGUAGE
 from config.config_helper import ConfigHelper
 from config.data_keys import DATA_KEY
 
-from ui.app import App
-
-DEFAULT_DATA = {
-        DATA_KEY.SELECT_AREA.value: "<alt>+x",
-        DATA_KEY.TOGGLE_OVERLAY.value: "<alt>+n",
-        DATA_KEY.TARGET_LANGUAGE.value: LANGUAGE.ENGLISH.value,
-        DATA_KEY.TRANSLATOR_SERVICE.value: SERVICE.DEEPL.value
-    }     
+from ui.app import App    
 
 class Main:    
     def __init__(self):                  
@@ -35,17 +28,13 @@ class Main:
             )           
     
     def init_app_data(self):
-        self.data = {key: self.config_helper.get_data(key, default)
-                    for key, default in DEFAULT_DATA.items()}
-        
+        self.data = self.config_helper.get_all_data()        
         self.target_language = LANGUAGE(int(self.data[DATA_KEY.TARGET_LANGUAGE.value]))
         self.service = SERVICE(int(self.data[DATA_KEY.TRANSLATOR_SERVICE.value]))                    
     
-    def on_save_data(self, keys):
+    def on_save_data(self, data):
         print("Save data")
-        for key, value in keys.items():
-            self.config_helper.save_data(key, value)
-        
+        self.config_helper.save_all_data(data)       
         self.init_app_data()
         
         self.translator.target_language = self.target_language
