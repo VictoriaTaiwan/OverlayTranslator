@@ -10,6 +10,8 @@ from .widget.options_widget import OptionsWidget
 from .widget.translator_widget import TranslatorWidget
 from .threads.translation_thread import TranslationThread
 
+from util import util
+
 class App(QApplication):
     def __init__(self, args, data, on_save_data, on_ocr, on_translate):
         super(App, self).__init__(args)
@@ -86,7 +88,7 @@ class App(QApplication):
         event.ignore()
     
     def create_tray(self):         
-        self.tray = QSystemTrayIcon(QIcon("src/res/images/penguin.png"), self)         
+        self.tray = QSystemTrayIcon(QIcon(util.resource_path(r"res\images\penguin.png")), self)         
         self.menu = QMenu() 
         
         self.settings_action = QAction("App") 

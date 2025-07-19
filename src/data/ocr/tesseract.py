@@ -1,22 +1,23 @@
 from tesserocr import PyTessBaseAPI
-import cv2
-import numpy
-from PIL import Image
+from util import util
+#import cv2
+#import numpy
+#from PIL import Image
 
 tessdata_path = r"src\res\tessdata"  # Path to tessdata folder
 
 class Ocr():   
     def image_to_text(self, image):
-        tesseract = PyTessBaseAPI(path=tessdata_path, lang='rus+eng+jpn')
+        tesseract = PyTessBaseAPI(path=util.resource_path(r"res\tessdata"), lang='rus+eng+jpn+chi_sim+chi_tra')
         try:
-            img = self.improve_image_quality(image)
-            tesseract.SetImage(img)
+            #img = self.improve_image_quality(image)
+            tesseract.SetImage(image)
             return tesseract.GetUTF8Text()
         finally:
             tesseract.End()
         #confidence = api.AllWordConfidences()
         #print(confidence)
-    
+    '''
     def improve_image_quality(self, image) -> Image:
         # Load the image
         img = cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR)
@@ -30,4 +31,4 @@ class Ocr():
         # Convert to gray-scale
         gry = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         return Image.fromarray(cv2.cvtColor(gry, cv2.COLOR_BGR2RGB))
-        
+    '''
