@@ -13,6 +13,8 @@ from .threads.translation_thread import TranslationThread
 from util import util
 
 class App(QApplication):
+    icon_path = util.resource_path(r"res\images\penguin.png")
+    
     def __init__(self, args, data, on_save_data, on_ocr, on_translate):
         super(App, self).__init__(args)
         
@@ -23,7 +25,8 @@ class App(QApplication):
         
         self.init_global_hotkeys(data)
         
-        self.overlay = Overlay(self.on_area_selected)
+        allScreens = QApplication.desktop().geometry()
+        self.overlay = Overlay(self.on_area_selected, allScreens)
         self.create_tabbed_widget()
         self.create_tray()
         self.exec_()
@@ -36,6 +39,7 @@ class App(QApplication):
         self.thread = TranslationThread(image, self.on_ocr, self.on_translate)                
         self.thread.ocr_result.connect(self.translator_widget.update_ocr_status)
         self.thread.translation_result.connect(self.translator_widget.update_translation_status)
+        self.thread.error_result.connect(self.translator_widget.update_error_status)
         
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.finished.connect(lambda: print("Background thread finished its work."))
@@ -88,19 +92,17 @@ class App(QApplication):
         event.ignore()
     
     def create_tray(self):         
-        self.tray = QSystemTrayIcon(QIcon(util.resource_path(r"res\images\penguin.png")), self)         
+        self.tray = QSystemTrayIcon(QIcon(self.icon_path), self)         
         self.menu = QMenu() 
         
-        self.settings_action = QAction("App") 
-        self.settings_action.triggered.connect(self.tabbed_widget.show)
-        self.menu.addAction(self.settings_action)   
+        self.app_visibility_action = QAction("App") 
+        self.app_visibility_action.triggered.connect(self.tabbed_widget.show)
+        self.menu.addAction(self.app_visibility_action)   
     
-        # To quit the app 
-        self.quit_action = QAction("Quit") 
-        self.quit_action.triggered.connect(self.on_app_quit) 
-        self.menu.addAction(self.quit_action)   
-    
-        # Adding options to the System Tray 
+        self.app_quit_action = QAction("Quit") 
+        self.app_quit_action.triggered.connect(self.on_app_quit) 
+        self.menu.addAction(self.app_quit_action)   
+
         self.tray.setContextMenu(self.menu) 
         self.tray.setVisible(True)
     

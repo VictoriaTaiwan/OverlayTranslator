@@ -42,7 +42,10 @@ class TranslatorWidget(QWidget):
     
     def update_translation_status(self, translation):
         self.status_label.setText('')
-        self.translationField.setText(translation)    
+        self.translationField.setText(translation)
+    
+    def update_error_status(self, error_message):
+        self.status_label.setText(error_message)        
     
     def mousePressEvent(self, event):
         if self.focusWidget() is not None:

@@ -6,5 +6,6 @@
         "tessdata",
         "Tesseract",
         "tesserocr"
-    ]
+    ],
+    "git.ignoreLimitWarning": true
 }

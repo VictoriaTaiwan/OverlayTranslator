@@ -4,12 +4,13 @@ from PyQt5.QtWidgets import QWidget
 from PIL import ImageGrab
 
 class Overlay(QWidget):
-    def __init__(self, on_area_selected):
+    def __init__(self, on_area_selected, screens):
         super().__init__()
 
         self.is_drawing_mode = False
         self.is_mouse_clicked = False
         self.on_area_selected = on_area_selected
+        self.screens = screens
         
         self.setWindowTitle("Overlay Translator")
         self.setMouseTracking(True)       
@@ -18,7 +19,8 @@ class Overlay(QWidget):
         self.setWindowFlags(Qt.ToolTip | Qt.WindowStaysOnTopHint| Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         #self.setAttribute(Qt.WA_TransparentForMouseEvents, not self.is_drawing_mode)
-        self.showFullScreen()               
+        self.setGeometry(screens)
+        self.show()               
         
         self.begin = QPoint()
         self.end = QPoint()

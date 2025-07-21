@@ -4,19 +4,33 @@ from util import util
 #import numpy
 #from PIL import Image
 
-tessdata_path = r"src\res\tessdata"  # Path to tessdata folder
-
-class Ocr():   
+class Ocr():
+    def __init__(self):
+        languages = 'rus+eng+jpn+chi_sim+chi_tra'
+        path = util.resource_path(r"res\tessdata")
+        try: self.tesseract = PyTessBaseAPI(path=path, lang=languages)
+        except Exception: self.tesseract = None       
+    
     def image_to_text(self, image):
-        tesseract = PyTessBaseAPI(path=util.resource_path(r"res\tessdata"), lang='rus+eng+jpn+chi_sim+chi_tra')
         try:
             #img = self.improve_image_quality(image)
-            tesseract.SetImage(image)
-            return tesseract.GetUTF8Text()
-        finally:
-            tesseract.End()
-        #confidence = api.AllWordConfidences()
-        #print(confidence)
+            self.tesseract.SetImage(image)
+            text = self.tesseract.GetUTF8Text()
+            if not (text and text.strip()):
+                raise RuntimeError(f"Text wasn't found on the image.")
+            else: return text
+        except AttributeError:
+            raise RuntimeError("OCR is not initialized.")    
+        except Exception as e:
+            raise RuntimeError(f"Ocr error. {e}")
+
+    def closeDownTesseract(self) -> str:
+        try:
+            self.tesseract.End()
+            return "Successfully closed down Tesseract."
+        except Exception as e:
+            return(f"Ocr error: {e}")    
+
     '''
     def improve_image_quality(self, image) -> Image:
         # Load the image
