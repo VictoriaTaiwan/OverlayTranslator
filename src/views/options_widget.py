@@ -5,35 +5,36 @@ from .hotkey_field import HotkeyField
 class OptionsWidget(QWidget):
     def __init__(self, model, controller):
         super().__init__()
-        self.model = model                                      
+        
+        self.model = model
         self.controller = controller
         
         main_container = QVBoxLayout(self)
         main_container.addStretch(1) # Spacer
         
-        self.form_layout = QFormLayout()
-        self.form_layout.setVerticalSpacing(20)
-        main_container.addLayout(self.form_layout)
+        form_layout = QFormLayout()
+        form_layout.setVerticalSpacing(20)
+        main_container.addLayout(form_layout)
         
         select_area_label = QLabel(text="Select area")
-        self.select_area_field = self.create_hotkey_field(controller.set_area_selection_hotkey, model.area_selection_hotkey)
-        self.form_layout.addRow(select_area_label, self.select_area_field) 
+        select_area_field = self.create_hotkey_field(controller.set_area_selection_hotkey, model.area_selection_hotkey)
+        form_layout.addRow(select_area_label, select_area_field) 
         
         show_app_label = QLabel(text="Show app")
-        self.show_app_field = self.create_hotkey_field(controller.set_show_app_hotkey, model.show_app_hotkey)
-        self.form_layout.addRow(show_app_label, self.show_app_field)
+        show_app_field = self.create_hotkey_field(controller.set_show_app_hotkey, model.show_app_hotkey)
+        form_layout.addRow(show_app_label, show_app_field)
         
         target_language_label = QLabel("Target language")
-        languageNames = self.controller.get_languages_names()
-        self.target_language_box = self.create_combo_box(controller.set_target_language, 
+        languageNames = controller.get_languages_names()
+        target_language_box = self.create_combo_box(controller.set_target_language, 
                                                         self.model.target_language, languageNames)
-        self.form_layout.addRow(target_language_label, self.target_language_box) 
+        form_layout.addRow(target_language_label, target_language_box) 
         
         translation_service_label = QLabel("Translation service")
-        serviceNames = self.controller.get_translation_services_names()
-        self.service_box = self.create_combo_box(controller.set_translation_service,
+        serviceNames = controller.get_translation_services_names()
+        service_box = self.create_combo_box(controller.set_translation_service,
                                                 self.model.translation_service, serviceNames)
-        self.form_layout.addRow(translation_service_label, self.service_box)  
+        form_layout.addRow(translation_service_label, service_box)  
         
         main_container.addStretch(1) # Spacer
     

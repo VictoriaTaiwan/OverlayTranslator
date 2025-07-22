@@ -1,26 +1,23 @@
-from tesserocr import PyTessBaseAPI
+import os
+import pytesseract
 from util import util
 #import cv2
 #import numpy
-#from PIL import Image
 
 class Ocr():
     def __init__(self):
         self.languages = 'rus+eng+jpn+chi_sim+chi_tra'
-        self.path = util.resource_path(r"res\tessdata")      
+        
+        self.tessdata_path = util.resource_path(r"res\tessdata")
+        pytesseract.pytesseract.tesseract_cmd = os.path.join(self.tessdata_path, "tesseract.exe")
+        os.environ['TESSDATA_PREFIX'] = util.resource_path(self.tessdata_path)
     
     def image_to_text(self, image):
         try:
-            with PyTessBaseAPI(self.path, self.languages) as api:
-            #img = self.improve_image_quality(image)
-                api.SetImage(image)
-                text = api.GetUTF8Text()
-                api.End()
-                if not (text and text.strip()):
-                    raise RuntimeError(f"Text wasn't found on the image.")
-                else: return text
-        except AttributeError:
-            raise RuntimeError("OCR is not initialized.")    
+            text = pytesseract.image_to_string(image, self.languages)
+            if not (text and text.strip()):
+                raise RuntimeError(f"Text wasn't found on the image.")
+            else: return text   
         except Exception as e:
             raise RuntimeError(f"Ocr error. {e}")
     

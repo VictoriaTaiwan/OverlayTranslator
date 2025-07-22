@@ -15,7 +15,6 @@ class Overlay(QWidget):
         self.setAttribute(Qt.WA_TranslucentBackground)
         #self.setAttribute(Qt.WA_TransparentForMouseEvents, not self.is_drawing_mode)
         
-        self.model.screen_size_changed.connect(self.setGeometry)
         self.model.is_area_selection_enabled_changed.connect(self.update)
         self.showFullScreen()
         

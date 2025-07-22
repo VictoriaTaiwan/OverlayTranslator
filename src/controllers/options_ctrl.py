@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QObject, pyqtSlot
+from PyQt5.QtCore import QObject
 
 from services.config_helper import ConfigHelper
 from enums.service import SERVICE

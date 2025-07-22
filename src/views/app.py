@@ -43,13 +43,11 @@ class App(QApplication):
         self.options_model.translation_service_value_changed.connect(self.translator_controller.set_translation_service)
         self.options_model.editing_hotkey_changed.connect(self.main_controller.set_editing_hotkey)               
 
-        self.main_controller.set_screen_size(QApplication.desktop().geometry())
         self.overlay = Overlay(self.main_model, self.main_controller)
+        self.overlay.setGeometry(QApplication.desktop().geometry())
         self.main_model.bbox_changed.connect(self.on_area_selected)
         
-        self.qIcon = QIcon(util.resource_path(r"res\images\penguin.png")) 
         self.create_tabbed_widget()
-        self.main_model.app_visible_changed.connect(self.tabbed_widget.setVisible)
         self.create_tray()
         self.exec_()
 
@@ -66,7 +64,7 @@ class App(QApplication):
         screenshot = ImageGrab.grab(bbox)
         self.main_controller.set_app_visible(True)
         self.main_controller.set_area_selection_enabled(False)
-        self.translator_controller.recognize_and_translate(screenshot)
+        self.translator_controller.ocr_and_translate(screenshot)
 
     def create_tabbed_widget(self):            
         self.tabbed_widget = QTabWidget()
@@ -83,6 +81,7 @@ class App(QApplication):
         self.options_widget = OptionsWidget(self.options_model, self.options_controller)
         self.tabbed_widget.addTab(self.options_widget, "Options") 
         
+        self.main_model.app_visible_changed.connect(self.tabbed_widget.setVisible)
         self.tabbed_widget.show()
 
     def on_tabbed_widget_quit(self, event):
@@ -90,7 +89,7 @@ class App(QApplication):
         event.ignore()
     
     def create_tray(self):        
-        self.tray = QSystemTrayIcon(self.qIcon, self)         
+        self.tray = QSystemTrayIcon(QIcon(util.resource_path(r"res\images\penguin.png")), self)         
         self.menu = QMenu() 
         
         self.app_visibility_action = QAction("App") 

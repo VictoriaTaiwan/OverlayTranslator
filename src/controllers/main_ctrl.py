@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QObject, pyqtSlot
+from PyQt5.QtCore import QObject
 
 class MainController(QObject):
     def __init__(self, model):
