@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtCore import Qt
+
 class HotkeyField(QLineEdit):
     def __init__(self, on_value_changed, on_set_focus, initial_value ='', parent=None):
         super().__init__(parent)

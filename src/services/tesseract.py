@@ -6,31 +6,24 @@ from util import util
 
 class Ocr():
     def __init__(self):
-        languages = 'rus+eng+jpn+chi_sim+chi_tra'
-        path = util.resource_path(r"res\tessdata")
-        try: self.tesseract = PyTessBaseAPI(path=path, lang=languages)
-        except Exception: self.tesseract = None       
+        self.languages = 'rus+eng+jpn+chi_sim+chi_tra'
+        self.path = util.resource_path(r"res\tessdata")      
     
     def image_to_text(self, image):
         try:
+            with PyTessBaseAPI(self.path, self.languages) as api:
             #img = self.improve_image_quality(image)
-            self.tesseract.SetImage(image)
-            text = self.tesseract.GetUTF8Text()
-            if not (text and text.strip()):
-                raise RuntimeError(f"Text wasn't found on the image.")
-            else: return text
+                api.SetImage(image)
+                text = api.GetUTF8Text()
+                api.End()
+                if not (text and text.strip()):
+                    raise RuntimeError(f"Text wasn't found on the image.")
+                else: return text
         except AttributeError:
             raise RuntimeError("OCR is not initialized.")    
         except Exception as e:
             raise RuntimeError(f"Ocr error. {e}")
-
-    def closeDownTesseract(self) -> str:
-        try:
-            self.tesseract.End()
-            return "Successfully closed down Tesseract."
-        except Exception as e:
-            return(f"Ocr error: {e}")    
-
+    
     '''
     def improve_image_quality(self, image) -> Image:
         # Load the image
