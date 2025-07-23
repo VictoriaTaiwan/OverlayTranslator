@@ -61,10 +61,12 @@ class Overlay(QWidget):
             self.update()                 
     
     def get_bbox(self):
-        x1 = self.begin.x()
-        x2 = self.end.x()
-        y1 = self.begin.y()
-        y2 = self.end.y()
+        begin = self.mapToGlobal(self.begin)
+        end = self.mapToGlobal(self.end)
+        x1 = begin.x()
+        x2 = end.x()
+        y1 = begin.y()
+        y2 = end.y()
                 
         left = min(x1, x2)
         right = max(x1, x2)
