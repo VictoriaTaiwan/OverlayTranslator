@@ -1,8 +1,9 @@
-
 import requests
+import urllib.parse as encoder
+
 from auth.keys import deepl_api_key
 from enums.service import SERVICE
-import urllib.parse as encoder
+from util import util
 
 class Translator:
     _deepl_api_base_url = "https://api-free.deepl.com/v2/translate"
@@ -31,7 +32,7 @@ class Translator:
         status_code = response.status_code
         if(status_code == 200):
             return response.json()["translations"][0]["text"]
-        else: self._handle_exceptions(status_code)
+        else: util.handle_exceptions(status_code, "DeepL")
         
     
     def _google_translate(self, text, target_language):
@@ -40,15 +41,7 @@ class Translator:
         status_code = response.status_code
         if(status_code == 200):
             return self._extract_google_translation(response.json())
-        else: self._handle_exceptions(status_code)
+        else: util.handle_exceptions(status_code, "Google")
     
     def _extract_google_translation(self, data):
         return ''.join(item[0] for item in data[0] if isinstance(item[0], str))
-    
-    def _handle_exceptions(self, status_code):
-        if status_code == 403:
-            raise requests.RequestException("Authorization failed. Please check your DeepL API key.")
-        elif status_code == 429:
-            raise requests.RequestException("Rate limit exceeded. Please wait and try again.")
-        else:
-            raise requests.RequestException(f"DeepL returned an error: HTTP {status_code}.")

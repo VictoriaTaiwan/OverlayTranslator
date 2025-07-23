@@ -1,23 +1,34 @@
-import os
-import pytesseract
-from util import util
 #import cv2
 #import numpy
 
+import requests
+from auth.keys import mistral_api_key
+from util import util
+
 class Ocr():
     def __init__(self):
-        self.languages = 'rus+eng+jpn+chi_sim+chi_tra'
-        
-        self.tessdata_path = util.resource_path(r"res\tessdata")
-        pytesseract.pytesseract.tesseract_cmd = os.path.join(self.tessdata_path, "tesseract.exe")
-        os.environ['TESSDATA_PREFIX'] = util.resource_path(self.tessdata_path)
+        self.mistral_ocr_url = r"https://api.mistral.ai/v1/ocr"
+        self.mistral_ocr_model = "mistral-ocr-latest"
     
-    def image_to_text(self, image):
+    def image_to_text(self, base_64_str):
         try:
-            text = pytesseract.image_to_string(image, self.languages)
-            if not (text and text.strip()):
-                raise RuntimeError(f"Text wasn't found on the image.")
-            else: return text   
+            payload = {
+                "model": self.mistral_ocr_model,
+                "document": {
+                    "type": "image_url",
+                    "image_url": f"data:image/png;base64,{base_64_str}"
+                },
+                "include_image_base64": True
+            }
+            headers = {
+                "Authorization": f"Bearer {mistral_api_key}",
+                "Content-Type": "application/json"
+            }
+            response = requests.post(url=self.mistral_ocr_url, json=payload, headers=headers)
+            status_code = response.status_code
+            if(status_code == 200):
+                return response.json()["pages"][0]["markdown"]
+            else: util.handle_exceptions(status_code)
         except Exception as e:
             raise RuntimeError(f"Ocr error. {e}")
     

@@ -1,3 +1,5 @@
+import base64
+import io
 from PyQt5.QtCore import QObject, QThreadPool
 
 from services.tesseract import Ocr
@@ -15,7 +17,15 @@ class TranslatorController(QObject):
         self.threadpool = QThreadPool()
     
     def ocr_and_translate(self, image):
-        worker = TranslationWorker(image, self.ocr.image_to_text, self._translate)
+        in_mem_file = io.BytesIO()
+        image.save(in_mem_file, format = "PNG")
+        # reset file pointer to start
+        in_mem_file.seek(0)
+        img_bytes = in_mem_file.read()
+        base64_encoded_result_bytes = base64.b64encode(img_bytes)
+        base64_encoded_result_str = base64_encoded_result_bytes.decode('ascii')
+        
+        worker = TranslationWorker(base64_encoded_result_str, self.ocr.image_to_text, self._translate)
         worker.signals.ocr_result.connect(self.set_ocr_value)
         worker.signals.translation_result.connect(self.set_translation_value)
         worker.signals.status_result.connect(self.set_status_value)

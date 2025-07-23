@@ -61,7 +61,7 @@ class App(QApplication):
         self.global_hotkeys.start()
     
     def on_area_selected(self, bbox):
-        screenshot = ImageGrab.grab(bbox)
+        screenshot = ImageGrab.grab(bbox=bbox, all_screens=True)
         self.main_controller.set_app_visible(True)
         self.main_controller.set_area_selection_enabled(False)
         self.translator_controller.ocr_and_translate(screenshot)
